@@ -175,10 +175,10 @@ std::ostream& operator<< (std::ostream& stream, const Result& res)
     {
         stream<<"INPUT["<<i<<"] = "<< res.in[i]<<std::endl;
     }
-    for (int i=0;i<res.out.size();i++)
-    {
-        stream<<"OUTPUT["<<i<<"] = "<< res.out[i]<<std::endl;
-    }
+//     for (int i=0;i<res.out.size();i++)
+//     {
+//         stream<<"OUTPUT["<<i<<"] = "<< res.out[i]<<std::endl;
+//     }
     return stream;
 }
     

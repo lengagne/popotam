@@ -39,6 +39,16 @@ class IntervalEstimator{
         {
             return depend_intermediate_;
         }
+        
+        uint get_index_current_control_points() const
+        {
+            return index_current_control_points_;
+        }
+        
+        uint get_nb_control_point_inputs() const
+        {
+            return nb_control_point_inputs_;
+        }
 
     unsigned int nb_in_;
     std::vector<MogsInterval*> dep_;
@@ -59,10 +69,7 @@ class IntervalEstimator{
     Kronecker* kron_solver_inputs_;
     Kronecker* kron_solver_errors_;
 
-//     Eigen::Matrix<LazyVariable,Eigen::Dynamic,1> sparse_coeff_inputs_;
     Eigen::Matrix<Real,Eigen::Dynamic,1> sparse_coeff_errors_;
-//    Eigen::Matrix<unsigned int,Eigen::Dynamic,1> sparse_index_inputs_, sparse_index_errors_;
-//     unsigned int nb_sparse_inputs_;
     unsigned int nb_sparse_errors_;
 
     unsigned int nb_control_point_inputs_;
@@ -73,9 +80,8 @@ class IntervalEstimator{
     bool avoid_error_computation_ = false;
     // use to compute the coefficients of the basis functions
     AbstractBasisFunction* bf_;       
-    
-//     std::vector< std::vector<double> > cut_direction_;
-//     std::vector< std::vector< bool > > cut_inf_;
+
+    uint index_current_control_points_;
 
 };
 

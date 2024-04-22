@@ -21,6 +21,8 @@ BissectionBasisFunctionSolver::BissectionBasisFunctionSolver(AbstractCSP* pb,
         bissection_type_ = 0;
     else if( bissection_type=="MaxFirst")
         bissection_type_ = 1;
+    else if( bissection_type=="Smart")
+        bissection_type_ = 2;    
     else
     {
         std::cerr<<"ERROR in "<< __FILE__<<" at line "<< __LINE__<<" the bissection type "<< bissection_type <<" is not defined"<<std::endl;
@@ -43,7 +45,10 @@ void BissectionBasisFunctionSolver::evaluate(   const std::vector<Interval> &in,
     Result tmp;
     tmp.in = in;   
     current_vector_.push_back(tmp);
-    set_next();
+
+    current_value_ = current_vector_.back();
+    current_vector_.pop_back();         
+    set_current_value();
     
     for (int i=0;i<nb_fun_;i++)
     {

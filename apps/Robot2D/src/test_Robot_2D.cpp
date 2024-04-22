@@ -46,7 +46,8 @@ int main( int argc, char** argv)
     }
 	if(argc > 5)
     {
-        options.add_double_option ( "precision", atof(argv[5]));
+        precision = atof(argv[5]);
+        options.add_double_option ( "precision", precision);        
     }
     
     

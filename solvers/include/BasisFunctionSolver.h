@@ -25,7 +25,11 @@ class BasisFunctionSolver: public AbstractSolver
         
         virtual void init_end();
         
-        virtual void set_next();
+        virtual void process_current();
+        
+        virtual bool process_current_with_score(double& score);
+        
+        virtual void set_current_value();
         
         
         

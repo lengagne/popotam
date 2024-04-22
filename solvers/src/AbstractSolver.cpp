@@ -19,8 +19,24 @@ bool AbstractSolver::check_size(   const Result& in)
     return true;
 }
 
-bool AbstractSolver::bissect( const Result& in,
-                                        std::vector<Result>& Pile)
+bool AbstractSolver::bissect(   std::vector<Result>& PileIn,
+                                std::vector<Result>& PileOut,
+                                uint nb)
+{
+    if (nb >0)
+    {
+        PileOut.clear();
+        for (int i=0;i<PileIn.size();i++)
+        {
+            bissect(PileIn[i], PileOut);
+        }
+        PileIn = PileOut;
+        bissect(PileIn, PileOut,nb-1);
+    }
+}
+
+bool AbstractSolver::bissect(   const Result& in,
+                                std::vector<Result>& Pile)
 {
     Result out1 = in;
     Result out2 = in;
@@ -30,10 +46,6 @@ bool AbstractSolver::bissect( const Result& in,
     for (unsigned int i=0;i<nb_var_;i++)
     {
         double t = Diam(in.in[i]);
-//         if (bissection_type_ ==2)
-//         {
-//             t*= in.bissect_weight[i]; 
-//         }
         if (Diam(in.in[i]) > precision_ && t >w)
         {
             w = t;
@@ -46,6 +58,7 @@ bool AbstractSolver::bissect( const Result& in,
     switch (bissection_type_)
     {
         case(0):
+        case(2):    // FIXME for the moment we use smart
             out2.in[id] = Hull( Inf(in.in[id]), Mid(in.in[id]));
             out1.in[id] = Hull( Mid(in.in[id]), Sup(in.in[id]));
             break;
@@ -55,20 +68,6 @@ bool AbstractSolver::bissect( const Result& in,
             out1.in[id] = Hull( Inf(in.in[id]), Mid(in.in[id]));
             break;
             
-//         case(2):   
-// 
-//             if(in.inf_sup_proba[id] /in.nb_info <= 0.0 )
-//             {
-// //                 std::cout<<"  First inferior part"<<std::endl<<std::endl;
-//                 out1.in[id] = Hull( Inf(in.in[id]), Mid(in.in[id]));
-//                 out2.in[id] = Hull( Mid(in.in[id]), Sup(in.in[id]));                
-//             }else
-//             {
-// //                 std::cout<<"  First superior part"<<std::endl<<std::endl;
-//                 out1.in[id] = Hull( Mid(in.in[id]), Sup(in.in[id]));
-//                 out2.in[id] = Hull( Inf(in.in[id]), Mid(in.in[id]));                
-//             }
-//             break;
         default:
                 std::cerr<<"File : "<< __FILE__<<" at line "<< __LINE__ <<std::endl;
                 std::cerr<<"Case not planned for the moment "<<std::endl;

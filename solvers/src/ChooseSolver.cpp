@@ -17,6 +17,7 @@ void PopotamPrintAllOptions()
     std::cout<<"\t bissection_mode : "<<std::endl;
     std::cout<<"\t\t MinFirst "<<std::endl;
     std::cout<<"\t\t MaxFirst "<<std::endl;
+    std::cout<<"\t\t Smart "<<std::endl;
 }
 
 void PopotamSetSolver( AbstractCSP* pb,
@@ -42,7 +43,7 @@ void PopotamSetSolver( AbstractCSP* pb,
         *solver = new BissectionIntervalSolver(pb,bissection_type);
     }else
     {
-        if (bissection_type == "MinFirst" || bissection_type == "MaxFirst")
+        if (bissection_type == "MinFirst" || bissection_type == "MaxFirst" || bissection_type == "Smart")
         {
             ChooseBasisFunction choice_bf;
             AbstractBasisFunction * bf;

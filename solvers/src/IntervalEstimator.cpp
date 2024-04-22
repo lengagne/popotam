@@ -234,7 +234,6 @@ check_constraint IntervalEstimator::update_from_inputs( Result& res, Interval& b
     bool inf_inside,sup_inside, both_side;
     
     Interval Iv = LazyUpdateOutput(num_out_,cpt++);
-//     std::cout<<"value(0) = "<< Iv <<std::endl;
     for (int i=1;i<nb_control_point_inputs_;i++)
     {
         Interval value = LazyUpdateOutput(num_out_,cpt++);
@@ -256,14 +255,11 @@ check_constraint IntervalEstimator::update_from_inputs( Result& res, Interval& b
         if ( inf_inside != sup_inside || both_side)
         {
             out = Iv;
-//             guess_next_bissection( i , res , before_in );
-//             std::cout<<"OVERLAP at "<< i <<" / "<< nb_control_point_inputs_<<std::endl;
-//             std::cout<<"out = "<< out <<" bound = "<< bound <<" before_in  = "<< before_in <<std::endl;        
-//             std::cout<<"on overlap avec info de bissection" <<std::endl;
-//             std::cout<<"OVERLAP inside = "<< inf_inside<< "  outside = "<< sup_inside <<" both side = "<< both_side <<std::endl;
+            index_current_control_points_ = i;
             return OVERLAP;            
         }
     }
+    index_current_control_points_ = nb_control_point_inputs_;
     
     Interval error;
     if ( Diam( res.error[num_out_]) >= OFFSET_ERROR_TH)
@@ -284,6 +280,7 @@ check_constraint IntervalEstimator::update_from_inputs( Result& res, Interval& b
         if ( Inf(out) >= Inf(bound) &&  Sup(out) <= Sup(bound) )
         {
 //             std::cout<<"INSIDE FINAL"<<std::endl;
+            index_current_control_points_++;
             return INSIDE;
         }
         else 

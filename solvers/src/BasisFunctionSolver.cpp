@@ -82,6 +82,7 @@ void BasisFunctionSolver::init(double eps)
     optim_crit_ = std::numeric_limits<double>::max();
     find_one_feasible_ =false;        
     cpt_iter_ = 0;
+    saved_iter_ = 0;
     if (save_and_load_)
     {        
         if (! load_save_filename(save_filename_,tmp))
@@ -161,28 +162,172 @@ void BasisFunctionSolver::init_end()
 
     init_done = true;
 }
-void BasisFunctionSolver::set_next()
-{    
-    current_value_ = current_vector_.back();
-    current_vector_.pop_back();         
-//     std::cout<<"input_Interval.size() = "<< input_Interval.size()<<std::endl;
-//     std::cout<<"current_value_.in.size() = "<< current_value_.in.size()<<std::endl;
+
+void BasisFunctionSolver::process_current()
+{
+    check_constraint type_optim = OVERLAP;
+    Interval tmp_crit = Hull(-std::numeric_limits<double>::max(),optim_crit_);
+    if(find_one_feasible_)  // if one solution found check if we can found better
+    {
+        compute_intermediate_for(nb_fun_);            
+        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);   
+    }
+
+    if( type_optim != OUTSIDE)
+    {
+        // check the constraint
+        check_constraint type = INSIDE;
+        for (int i=0;i<nb_fun_;i++)  
+        {
+            if(!current_value_.ctr_ok[i] )
+            {
+                compute_intermediate_for(i);
+                switch(infos[i]->update_from_inputs(current_value_, bounds_[i],i))    
+                {
+                    case(OUTSIDE)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
+//                                             std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
+                                        type = OUTSIDE;
+                                        break;
+                    case(INSIDE)    :   //if (print_) std::cout<<" ctr("<< i<<") =  INSIDE"<<std::endl;
+//                                             std::cout<<" ctr("<< i<<") =  INSIDE"<<std::endl;
+                                        current_value_.ctr_ok[i] = true;
+                                        break;
+                    case(OVERLAP)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OVERLAP"<<std::endl;
+//                                             std::cout<<" ctr("<< i<<") =  OVERLAP"<<std::endl;
+                                        type = OVERLAP;
+                                        current_value_.ctr_ok[i] = false;
+                                        break;
+                }
+                if(type==OUTSIDE)
+//                     if(type==OUTSIDE || type ==OVERLAP)
+                    break;
+            }
+        }
+        update_input();               
+                    
+        // check the optimal
+        switch(type)
+        {
+            case(OUTSIDE)   :   break;
+            case(INSIDE)    :   
+                                if(!find_one_feasible_)
+                                {
+                                    compute_intermediate_for(nb_fun_);
+//                                         std::cout<<"dealing with optim after"<< std::endl;
+                                    type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);
+                                }
+                                
+                                if (type_optim == INSIDE)
+                                {
+                                    find_one_feasible_ = true;
+                                    optim_crit_ =  Sup(current_value_.out[nb_fun_]);
+                                    optim_ = current_value_;
+                                    bissect(current_value_,current_vector_);
+
+                                }else  if (type_optim == OVERLAP)//if (Inf(tmp_crit) < optim_crit_)
+                                {
+                                    bissect(current_value_,current_vector_);
+                                }
+                                break;
+            case(OVERLAP)   :   
+                                bissect(current_value_,current_vector_);
+                                break;
+        }
+    }
+}
+
+
+bool BasisFunctionSolver::process_current_with_score(double& score)
+{
+    score = 0.0;
+    bool to_proceed = true;
+    check_constraint type_optim = OVERLAP;
+    Interval tmp_crit = Hull(-std::numeric_limits<double>::max(),optim_crit_);
+    if(find_one_feasible_)  // if one solution found check if we can found better
+    {
+        compute_intermediate_for(nb_fun_);            
+        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);   
+        score += info_crit_->get_index_current_control_points();
+    }
+
+    if( type_optim != OUTSIDE)
+    {
+        // check the constraint
+        check_constraint type = INSIDE;
+        for (int i=0;i<nb_fun_;i++)  
+        {
+            if(!current_value_.ctr_ok[i] )
+            {
+                compute_intermediate_for(i);
+                check_constraint ctr = infos[i]->update_from_inputs(current_value_, bounds_[i],i);
+                score += infos[i]->get_index_current_control_points();
+                switch(ctr)    
+                {
+                    case(OUTSIDE)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
+//                                             std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
+                                        type = OUTSIDE;
+                                        break;
+                    case(INSIDE)    :   //if (print_) std::cout<<" ctr("<< i<<") =  INSIDE"<<std::endl;
+//                                             std::cout<<" ctr("<< i<<") =  INSIDE"<<std::endl;
+                                        current_value_.ctr_ok[i] = true;
+                                        break;
+                    case(OVERLAP)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OVERLAP"<<std::endl;
+//                                             std::cout<<" ctr("<< i<<") =  OVERLAP"<<std::endl;
+                                        type = OVERLAP;
+                                        current_value_.ctr_ok[i] = false;
+                                        break;
+                }
+                if(type==OUTSIDE)
+                {
+                    return false;
+                }
+            }else
+            {
+                score += infos[i]->get_nb_control_point_inputs();
+            }
+        }
+        update_input();               
+                    
+        // check the optimal
+        switch(type)
+        {
+            case(OUTSIDE)   :   return false;
+            case(INSIDE)    :   
+                                if(!find_one_feasible_)
+                                {
+                                    compute_intermediate_for(nb_fun_);
+                                    type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);
+                                    score += info_crit_->get_index_current_control_points();
+                                }
+                                
+                                if (type_optim == INSIDE)
+                                {
+                                    find_one_feasible_ = true;
+                                    optim_crit_ =  Sup(current_value_.out[nb_fun_]);
+                                    optim_ = current_value_;
+                                }
+                                break;
+            case(OVERLAP)   :   
+                                
+                                break;
+        }
+    }else
+    {
+        return false;
+    }
+    
+    return true;
+}
+
+void BasisFunctionSolver::set_current_value()
+{        
     for (int i=0;i<nb_var_;i++)
     {
-//         std::cout<<"current_value_["<<i<<"] = "<< current_value_.in[i]<<std::endl;
         input_Interval[i].update( current_value_.in[i]);        
     }   
-//     std::cout<<"current_value_ = "<< current_value_<<std::endl;
     for (int i=0;i<nb_intermediate_;i++)
     {
         intermediate_updated_[i] = false;
-//         #ifndef TEST_ENABLED
-//         {
-//             Interval v = infos_intermediate_update[i]->update_from_inputs();
-//             Intermediate_to_update[i].update( v);
-// //             std::cout<<"intermediate("<<i<<") = "<< v <<std::endl;
-//         }
-//         #endif
     }         
 }
 
@@ -193,123 +338,127 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
     solve_optim_ = true;
     init(eps);
     
-    
-    bool test;
-    
-    switch(bissection_type_)
+    if (bissection_type_ ==0 || bissection_type_ == 1)
     {
-        case(0):    std::cout<<"Bissection : MinFirst"<<std::endl;  break;
-        case(1):    std::cout<<"Bissection : MaxFirst"<<std::endl;  break;
-//         case(2):    std::cout<<"Bissection : Smart"<<std::endl;  break;
-        default :   std::cerr<<"Bissection type not defined "<<std::endl;   std::exit(63);  break;
-    }    
     
-    std::vector<double> bissect_weight(nb_var_);
-    
-    if(current_vector_.size() == 0)
+        bool test;
+        
+        switch(bissection_type_)
+        {
+            case(0):    std::cout<<"Bissection : MinFirst"<<std::endl;  break;
+            case(1):    std::cout<<"Bissection : MaxFirst"<<std::endl;  break;
+            case(2):    std::cout<<"Bissection : Smart"<<std::endl;  break;
+            default :   std::cerr<<"Bissection type not defined "<<std::endl;   std::exit(63);  break;
+        }    
+        
+        std::vector<double> bissect_weight(nb_var_);
+        
+        if(current_vector_.size() == 0)
+        {
+            std::cout<<"We may already load optim results (nothing in the pile)"<<std::endl;
+            return set_results();
+        }
+        
+        do{
+                       
+            test = true;
+            // unpile
+            current_value_ = current_vector_.back();
+            current_vector_.pop_back();                 
+            set_current_value();        
+           
+            cpt_iter_++;
+            process_current();
+//             std::cout<<"current_value_ = "<< current_value_ <<std::endl;
+            if (cpt_iter_%save_each_iter_ == 0)
+            {
+                save_current_state(save_filename_);   
+                cpt_iter_ = 0;
+                saved_iter_ ++;            
+            }
+            
+            
+            if(current_vector_.size() == 0) test = false;
+        }while(test ); // && cpt_iter_ < max_iter_ );
+
+    }else
     {
-        std::cout<<"We may already load optim results (nothing in the pile)"<<std::endl;
-        return set_results();
+        switch(bissection_type_)
+        {
+            case(0):    std::cout<<"Bissection : MinFirst"<<std::endl;  break;
+            case(1):    std::cout<<"Bissection : MaxFirst"<<std::endl;  break;
+            case(2):    std::cout<<"Bissection : Smart"<<std::endl;  break;
+            default :   std::cerr<<"Bissection type not defined "<<std::endl;   std::exit(63);  break;
+        }    
+
+        do{
+            std::vector<Result> eval_first;
+            std::vector<Result> eval_vector;
+            std::vector<double> score;
+            uint max = 2;
+            
+            // on crée le vecteur à partir de la pile.           
+            eval_first.push_back(current_vector_.back());
+            current_vector_.pop_back();  
+            
+            
+            
+            bissect(eval_first,eval_vector,4);
+            
+//             std::cout<<"****"<<std::endl<<std::endl;
+            for (int i=0;i<eval_vector.size();i++)
+            {   
+                cpt_iter_++;
+                current_value_ = eval_vector[i];                
+                double s;
+                set_current_value();        
+                bool to_proceed = process_current_with_score(s);
+                
+//                 std::cout<<" score : "<< s <<" value = "<< current_value_<<std::endl;
+                if (!to_proceed)
+                {
+                    eval_vector.erase( eval_vector.begin()+i);
+                    i--;
+                }else
+                {
+                    score.push_back(s);
+                }
+            }
+            
+//             std::cout<<"checking score"<<std::endl;
+            while(eval_vector.size())
+            {
+                // find the worst to store it first
+                double max = std::numeric_limits<double>::max();
+                uint index_worst=0;
+                for (int j=0;j<eval_vector.size();j++)
+                {
+                    if (score[j] < max)
+                    {
+                        index_worst = j;
+                        max = score[j];                        
+                    }
+                }
+//                 std::cout<<"store : "<< max <<std::endl;
+                current_vector_.push_back(eval_vector[index_worst]);
+                eval_vector.erase( eval_vector.begin()+index_worst);
+                score.erase( score.begin()+index_worst);                
+            }
+            
+            
+            
+            if (cpt_iter_%save_each_iter_ == 0)
+            {
+    //             std::cout<<cpt_iter_<<" crit ! "<< optim_crit_ <<std::endl;
+                save_current_state(save_filename_);   
+                cpt_iter_ = 0;
+                saved_iter_ ++;            
+            }
+            
+        }while(current_vector_.size() != 0);
     }
     
     
-//     uint max_iter = 1e3;
-    do{
-//         std::cout<<"*****************************************"<<std::endl;
-        cpt_iter_++;
-        if (cpt_iter_%save_each_iter_ == 0)
-        {
-//             std::cout<<cpt_iter_<<" crit ! "<< optim_crit_ <<std::endl;
-            save_current_state(save_filename_);   
-            cpt_iter_ = 0;
-            saved_iter_ ++;            
-        }
-        
-        test = true;
-        set_next();        
-        check_constraint type_optim = OVERLAP;
-        Interval tmp_crit = Hull(-std::numeric_limits<double>::max(),optim_crit_);
-        if(find_one_feasible_)  // if one solution found check if we can found better
-        {
-//             type_optim = info_crit_->update_from_inputs(tmp_crit,tout);
-//             std::cout<<"dealing with optim before"<< std::endl;
-            compute_intermediate_for(nb_fun_);            
-            type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);   
-//             current_value_.info_defined = false;
-        }
-
-        if( type_optim != OUTSIDE)
-        {
-            // check the constraint
-            check_constraint type = INSIDE;
-            for (int i=0;i<nb_fun_;i++)  
-            {
-                if(!current_value_.ctr_ok[i] )
-                {
-                    compute_intermediate_for(i);
-                    switch(infos[i]->update_from_inputs(current_value_, bounds_[i],i))    
-                    {
-                        case(OUTSIDE)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
-//                                             std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
-                                            type = OUTSIDE;
-                                            break;
-                        case(INSIDE)    :   //if (print_) std::cout<<" ctr("<< i<<") =  INSIDE"<<std::endl;
-//                                             std::cout<<" ctr("<< i<<") =  INSIDE"<<std::endl;
-                                            current_value_.ctr_ok[i] = true;
-                                            break;
-                        case(OVERLAP)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OVERLAP"<<std::endl;
-//                                             std::cout<<" ctr("<< i<<") =  OVERLAP"<<std::endl;
-                                            type = OVERLAP;
-                                            current_value_.ctr_ok[i] = false;
-                                            break;
-                    }
-                    if(type==OUTSIDE)
-//                     if(type==OUTSIDE || type ==OVERLAP)
-                        break;
-                }
-            }
-            update_input();               
-                        
-            // check the optimal
-            switch(type)
-            {
-                case(OUTSIDE)   :   break;
-                case(INSIDE)    :   
-                                    if(!find_one_feasible_)
-                                    {
-                                        compute_intermediate_for(nb_fun_);
-//                                         std::cout<<"dealing with optim after"<< std::endl;
-                                        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);
-                                    }
-                                    
-//                                     std::cout<<"We found one feasible : "<< current_value_.out[nb_fun_] <<std::endl;
-                                    if (type_optim == INSIDE)
-                                    {
-                                    
-//                                         std::cout<<"  tmp = "<< tmp_crit <<std::endl;
-                                        find_one_feasible_ = true;
-//                                         optim_crit_ =  Sup(tmp_crit);
-                                        optim_crit_ =  Sup(current_value_.out[nb_fun_]);
-                                        
-//                                         std::cout<<"optim_crit_ = "<<current_value_.out[nb_fun_]<<std::endl<<std::endl;                                        
-//                                         std::cout<<"current_value_ = "<<current_value_<<std::endl<<std::endl;
-                                        optim_ = current_value_;
-//                                         Result result1, result2;
-                                        bissect(current_value_,current_vector_);
-
-                                    }else  if (type_optim == OVERLAP)//if (Inf(tmp_crit) < optim_crit_)
-                                    {
-                                        bissect(current_value_,current_vector_);
-                                    }
-                                    break;
-                case(OVERLAP)   :   
-                                    bissect(current_value_,current_vector_);
-                                    break;
-            }
-        }
-        if(current_vector_.size() == 0) test = false;
-    }while(test ); // && cpt_iter_ < max_iter_ );
-//     }while(test && cpt_iter_ < max_iter );
-
+    
     return set_results();
 }
