@@ -28,6 +28,7 @@ typedef struct optim_info
     double optim_crit_;
     bool find_one_feasible_ =false;
     Result optim_;    
+    double additionnal_score;
 }optim_info;
 
 

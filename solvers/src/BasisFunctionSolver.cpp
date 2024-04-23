@@ -357,29 +357,31 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
             default :   std::cerr<<"Bissection type not defined "<<std::endl;   std::exit(63);  break;
         }    
 
+        
+        
         do{
             std::vector<Result> eval_first;
             std::vector<Result> eval_vector;
 //             std::vector<double> score;
-            uint max = 2;
             
             // on crée le vecteur à partir de la pile.           
             eval_first.push_back(current_vector_.back());
             current_vector_.pop_back();  
             bissect(eval_first,eval_vector,4);            
             
-            std::vector<double> score(eval_vector.size());
             std::vector<double> to_proceed(eval_vector.size());
+            std::vector<optim_info> set_infos(eval_vector.size());
+            
+            for (int i=0;i<eval_vector.size();i++)
+            {
+                set_infos[i] = optim_info_;
+                set_infos[i].additionnal_score = 0;
+            }
             
             for (int i=0;i<eval_vector.size();i++)
             {   
                 cpt_iter_++;
-//                 current_value_ = eval_vector[i];                
-//                 double s;
-//                 set_current_value();        
-//                 to_proceed[i] = current_evaluator_->process_current_with_score(eval_vector[i],score[i]);
-                
-                to_proceed[i] = current_evaluator_->process_current(eval_vector[i], optim_info_);
+                to_proceed[i] = current_evaluator_->process_current(eval_vector[i], set_infos[i]);
             }
             
             for (int i=0;i<eval_vector.size();i++)
@@ -388,10 +390,24 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
                 {
                     eval_vector.erase( eval_vector.begin()+i);
                     to_proceed.erase(to_proceed.begin()+i);
-                    score.erase(score.begin()+i);
+                    set_infos.erase(set_infos.begin()+i);
                     i--;
                 }
             }            
+            
+            // store optim
+            int index_optim=-1;
+            double optim = optim_info_.optim_crit_;
+            for (int i=0;i<set_infos.size();i++)
+            {
+                if (set_infos[i].find_one_feasible_ &&  optim > set_infos[i].optim_crit_)
+                {
+                    index_optim = i;
+                    optim = set_infos[i].optim_crit_;
+                }
+            }
+            if (index_optim>=0)
+                optim_info_ = set_infos[index_optim];
             
 //             std::cout<<"checking score"<<std::endl;
             while(eval_vector.size())
@@ -401,16 +417,18 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
                 uint index_worst=0;
                 for (int j=0;j<eval_vector.size();j++)
                 {
-                    if (score[j] < max)
+//                     std::cout<<"score("<<j<<") = "<< set_infos[j].additionnal_score <<std::endl;
+                    if (set_infos[j].additionnal_score < max)
                     {
                         index_worst = j;
-                        max = score[j];                        
+                        max = set_infos[j].additionnal_score;
                     }
                 }
+//                 std::cout<<"choose : "<< index_worst <<std::endl;
 //                 std::cout<<"store : "<< max <<std::endl;
                 current_vector_.push_back(eval_vector[index_worst]);
-                eval_vector.erase( eval_vector.begin()+index_worst);
-                score.erase( score.begin()+index_worst);                
+                eval_vector.erase( eval_vector.begin()+index_worst);            
+                set_infos.erase( set_infos.begin()+index_worst);      
             }
             
             

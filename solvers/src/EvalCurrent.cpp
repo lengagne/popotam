@@ -134,7 +134,8 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
     if(info.find_one_feasible_)  // if one solution found check if we can found better
     {
         compute_intermediate_for(nb_fun_);            
-        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);   
+        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_); 
+        info.additionnal_score += info_crit_->get_index_current_control_points();
     }
 
     if( type_optim != OUTSIDE)
@@ -146,7 +147,10 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
             if(!current_value_.ctr_ok[i] )
             {
                 compute_intermediate_for(i);
-                switch(infos[i]->update_from_inputs(current_value_, bounds_[i],i))    
+                check_constraint ctr = infos[i]->update_from_inputs(current_value_, bounds_[i],i);
+                info.additionnal_score += infos[i]->get_index_current_control_points();                
+                
+                switch(ctr)    
                 {
                     case(OUTSIDE)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
 //                                             std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
@@ -178,6 +182,7 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
                                 {
                                     compute_intermediate_for(nb_fun_);
                                     type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);
+                                    info.additionnal_score += info_crit_->get_index_current_control_points();
                                 }
                                 
                                switch(type_optim)
@@ -199,91 +204,6 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
         }
     }
     return false;
-}
-
-bool EvalCurrent::process_current_with_score( Result& value, double & score)
-{
-//     set_current(value);
-//     
-//     score = 0.0;
-//     bool to_proceed = true;
-//     check_constraint type_optim = OVERLAP;
-//     Interval tmp_crit = Hull(-std::numeric_limits<double>::max(),optim_crit_);
-//     if(find_one_feasible_)  // if one solution found check if we can found better
-//     {
-//         compute_intermediate_for(nb_fun_);            
-//         type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);   
-//         score += info_crit_->get_index_current_control_points();
-//     }
-// 
-//     if( type_optim != OUTSIDE)
-//     {
-//         // check the constraint
-//         check_constraint type = INSIDE;
-//         for (int i=0;i<nb_fun_;i++)  
-//         {
-//             if(!current_value_.ctr_ok[i] )
-//             {
-//                 compute_intermediate_for(i);
-//                 check_constraint ctr = infos[i]->update_from_inputs(current_value_, bounds_[i],i);
-//                 score += infos[i]->get_index_current_control_points();
-//                 switch(ctr)    
-//                 {
-//                     case(OUTSIDE)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
-// //                                             std::cout<<" ctr("<< i<<") =  OUTSIDE"<<std::endl;
-//                                         type = OUTSIDE;
-//                                         break;
-//                     case(INSIDE)    :   //if (print_) std::cout<<" ctr("<< i<<") =  INSIDE"<<std::endl;
-// //                                             std::cout<<" ctr("<< i<<") =  INSIDE"<<std::endl;
-//                                         current_value_.ctr_ok[i] = true;
-//                                         break;
-//                     case(OVERLAP)   :   //if (print_) std::cout<<" ctr("<< i<<") =  OVERLAP"<<std::endl;
-// //                                             std::cout<<" ctr("<< i<<") =  OVERLAP"<<std::endl;
-//                                         type = OVERLAP;
-//                                         current_value_.ctr_ok[i] = false;
-//                                         break;
-//                 }
-//                 if(type==OUTSIDE)
-//                 {
-//                     return false;
-//                 }
-//             }else
-//             {
-//                 score += infos[i]->get_nb_control_point_inputs();
-//             }
-//         }
-//         update_input();               
-//                     
-//         // check the optimal
-//         switch(type)
-//         {
-//             case(OUTSIDE)   :   return false;
-//             case(INSIDE)    :   
-//                                 if(!find_one_feasible_)
-//                                 {
-//                                     compute_intermediate_for(nb_fun_);
-//                                     type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);
-//                                     score += info_crit_->get_index_current_control_points();
-//                                 }
-//                                 
-//                                 if (type_optim == INSIDE)
-//                                 {
-//                                     find_one_feasible_ = true;
-//                                     optim_crit_ =  Sup(current_value_.out[nb_fun_]);
-//                                     optim_ = current_value_;
-//                                 }
-//                                 break;
-//             case(OVERLAP)   :   
-//                                 
-//                                 break;
-//         }
-//     }else
-//     {
-//         return false;
-//     }
-//     
-//     return true;
- 
 }
 
 void EvalCurrent::set_current( const Result& value)

@@ -24,10 +24,7 @@ class EvalCurrent
         
         void init();
         
-        bool process_current(Result& value, optim_info& info);
-        
-        bool process_current_with_score( Result& value, double & score);
-       
+        bool process_current(Result& value, optim_info& info);        
         
 
     private:
