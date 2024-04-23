@@ -49,27 +49,6 @@ void BissectionBasisFunctionSolver::evaluate(   const std::vector<Interval> &in,
     current_evaluator_->evaluate( tmp);
     out = tmp.out;
     
-// //     current_value_ = current_vector_.back();
-//     current_vector_.pop_back();         
-//     
-//     
-//     
-//     set_current_value();
- /*   
-    for (int i=0;i<nb_fun_;i++)
-    {
-        compute_intermediate_for(i);
-        out[i] = infos[i]->update_from_inputs();
-    }
-    if(solve_optim_)
-    {
-        compute_intermediate_for(nb_fun_);
-//         std::cout<<"calcul de la deniere "<<std::endl;
-        out[nb_fun_] = info_crit_->update_from_inputs();
-    }else
-    {
-        std::cout<<"on ne calcule pas le dernier"<<std::endl;
-    }*/
 }
 
 void BissectionBasisFunctionSolver::init(double eps)
@@ -82,17 +61,6 @@ void BissectionBasisFunctionSolver::init(double eps)
     
     current_evaluator_ = new EvalCurrent(pb_,bf_);
 
-//     infos.resize(nb_fun_);
-//     for (int i=0;i<nb_fun_;i++)
-//     {
-//         infos[i] = new IntervalEstimator(bf_);
-//     }
-// 
-//     if(solve_optim_)
-//     {
-//         info_crit_ = new IntervalEstimator( bf_);
-//     }
-    
     current_evaluator_->init();
     
     BasisFunctionSolver::init_end();
