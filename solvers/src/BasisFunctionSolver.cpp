@@ -394,36 +394,36 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
         do{
             std::vector<Result> eval_first;
             std::vector<Result> eval_vector;
-            std::vector<double> score;
+//             std::vector<double> score;
             uint max = 2;
             
             // on crée le vecteur à partir de la pile.           
             eval_first.push_back(current_vector_.back());
             current_vector_.pop_back();  
+            bissect(eval_first,eval_vector,4);            
             
+            std::vector<double> score(eval_vector.size());
+            std::vector<double> to_proceed(eval_vector.size());
             
-            
-            bissect(eval_first,eval_vector,4);
-            
-//             std::cout<<"****"<<std::endl<<std::endl;
             for (int i=0;i<eval_vector.size();i++)
             {   
                 cpt_iter_++;
                 current_value_ = eval_vector[i];                
                 double s;
                 set_current_value();        
-                bool to_proceed = process_current_with_score(s);
-                
-//                 std::cout<<" score : "<< s <<" value = "<< current_value_<<std::endl;
-                if (!to_proceed)
+                to_proceed[i] = process_current_with_score(score[i]);
+            }
+            
+            for (int i=0;i<eval_vector.size();i++)
+            {
+                if (!to_proceed[i])
                 {
                     eval_vector.erase( eval_vector.begin()+i);
+                    to_proceed.erase(to_proceed.begin()+i);
+                    score.erase(score.begin()+i);
                     i--;
-                }else
-                {
-                    score.push_back(s);
                 }
-            }
+            }            
             
 //             std::cout<<"checking score"<<std::endl;
             while(eval_vector.size())
