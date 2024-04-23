@@ -379,7 +379,7 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
 //                 set_current_value();        
 //                 to_proceed[i] = current_evaluator_->process_current_with_score(eval_vector[i],score[i]);
                 
-                to_proceed[i] = current_evaluator_->process_current(current, optim_info_);
+                to_proceed[i] = current_evaluator_->process_current(eval_vector[i], optim_info_);
             }
             
             for (int i=0;i<eval_vector.size();i++)
