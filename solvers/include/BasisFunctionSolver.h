@@ -3,9 +3,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "AbstractSolver.h"
-// #include "ComputedTree.h"
-#include "IntervalEstimator.h"
+#include "EvalCurrent.h"
 
 
 class BasisFunctionSolver: public AbstractSolver
@@ -14,10 +12,10 @@ class BasisFunctionSolver: public AbstractSolver
        
         virtual param_optim solve_optim(double eps=1e-3);
         
-        void compute_intermediate_for(uint num_function);
+//         void compute_intermediate_for(uint num_function);
         
-        void get_all_intermediate_dependancies( const std::list<uint>& id_to_add,
-                                                 std::list<uint> & full_list);
+//         void get_all_intermediate_dependancies( const std::list<uint>& id_to_add,
+//                                                  std::list<uint> & full_list);
 
     protected:
         
@@ -25,34 +23,30 @@ class BasisFunctionSolver: public AbstractSolver
         
         virtual void init_end();
         
-        virtual void process_current();
+//         virtual void process_current();
         
-        virtual bool process_current_with_score(double& score);
+//         virtual bool process_current_with_score(double& score);
         
-        virtual void set_current_value();
-        
-        
-        
-        virtual void update_input() = 0;
+//         virtual void set_current_value();
 
         bool solve_optim_ = false;
-        
-        Result current_value_;
 
-        std::vector<MogsInterval> input_Interval,output_Interval;
-        std::vector<MogsInterval> Intermediate_to_compute;
-        std::vector<MogsInterval> Intermediate_to_update;
+        EvalCurrent* current_evaluator_;
         
+//         Result current_value_;
 
-        std::vector<IntervalEstimator*> infos;
-        std::vector<IntervalEstimator*> infos_intermediate_update;
+//         std::vector<MogsInterval> input_Interval,output_Interval;
+//         std::vector<MogsInterval> Intermediate_to_compute;
+//         std::vector<MogsInterval> Intermediate_to_update;
+//         std::vector<IntervalEstimator*> infos;
+//         std::vector<IntervalEstimator*> infos_intermediate_update;
         
-        std::vector<bool> intermediate_updated_;
-        std::vector< std::list<uint> > intermediate_needed_;
+//         std::vector<bool> intermediate_updated_;
+//         std::vector< std::list<uint> > intermediate_needed_;
         
-        IntervalEstimator* info_crit_;
+//         IntervalEstimator* info_crit_;
 
-        std::vector<MogsInterval> intermediate_;
+//         std::vector<MogsInterval> intermediate_;
 
         bool init_done = false;                
         

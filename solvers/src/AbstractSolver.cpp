@@ -213,9 +213,9 @@ bool AbstractSolver::load_save_filename( const std::string& filename,
      
          if (Child.tagName()=="optim")
          {
-            optim_crit_ = Child.attribute("crit").toDouble();
-            find_one_feasible_ = QVariant(Child.attribute("feasible")).toBool();
-            optim_.load(Child);
+            optim_info_.optim_crit_ = Child.attribute("crit").toDouble();
+            optim_info_.find_one_feasible_ = QVariant(Child.attribute("feasible")).toBool();
+            optim_info_.optim_.load(Child);
          }              
          
          Child = Child.nextSibling().toElement();
@@ -286,9 +286,9 @@ void AbstractSolver::save_current_state( const std::string& filename)
     root.appendChild(pile);
     
     QDomElement optim = document.createElement("optim");
-    optim.setAttribute("crit", QString::number(optim_crit_,'e',24));
-    optim.setAttribute("feasible", QVariant(find_one_feasible_).toString());
-    optim_.save(document,optim);
+    optim.setAttribute("crit", QString::number(optim_info_.optim_crit_,'e',24));
+    optim.setAttribute("feasible", QVariant(optim_info_.find_one_feasible_).toString());
+    optim_info_.optim_.save(document,optim);
     root.appendChild(optim);   
     
     
@@ -307,11 +307,11 @@ param_optim AbstractSolver::set_results()
     std::cout<<"Time per iteration : "<< (previous_time_ + current_time_ - start_computation_time_)/((saved_iter_*save_each_iter_)+cpt_iter_) <<" seconds."<<std::endl;
     std::cout<<"total time : "<< previous_time_+ current_time_ - start_preparation_time_ <<" seconds."<<std::endl;
     close_files();
-    if(find_one_feasible_)
+    if(optim_info_.find_one_feasible_)
     {
-        std::cout<<"crit = "<< optim_crit_ <<std::endl;
+        std::cout<<"crit = "<< optim_info_.optim_crit_ <<std::endl;
         for (int i=0;i<nb_var_;i++)
-            std::cout<<"input["<<i<<"] = "<< optim_.in[i]<<std::endl;
+            std::cout<<"input["<<i<<"] = "<< optim_info_.optim_.in[i]<<std::endl;
     }else
         std::cout<<"crit =  -1 \nno feasible solution found"<<std::endl;
 
@@ -323,9 +323,9 @@ param_optim AbstractSolver::set_results()
     out.nb_possible_boxes = nb_maybe_box_;
     out.computation_time = previous_time_ + current_time_ - start_preparation_time_;
     out.computation_time_wo_prep = previous_time_ + current_time_ - start_computation_time_;
-    out.optim = optim_crit_;    
-    out.nb_intermediate = nb_intermediate_;
-    out.solution_found = find_one_feasible_;
+    out.optim = optim_info_.optim_crit_;    
+//     out.nb_intermediate = nb_intermediate_;
+    out.solution_found = optim_info_.find_one_feasible_;
 
     return out;
 }

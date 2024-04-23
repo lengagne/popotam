@@ -23,6 +23,12 @@ typedef struct param_optim
     bool solution_found = true;
 } param_optim;
 
+typedef struct optim_info
+{
+    double optim_crit_;
+    bool find_one_feasible_ =false;
+    Result optim_;    
+}optim_info;
 
 
 class AbstractSolver
@@ -101,7 +107,7 @@ class AbstractSolver
         unsigned int nb_maybe_box_;
 //         double ignored_space_;
         
-        unsigned int nb_intermediate_ = 0;
+//         unsigned int nb_intermediate_ = 0;
 
         unsigned int nb_fun_, nb_var_;
 
@@ -117,9 +123,10 @@ class AbstractSolver
         
         double previous_time_ = 0;
         
-        double optim_crit_;
-        bool find_one_feasible_ =false;
-        Result optim_;
+//         double optim_crit_;
+//         bool find_one_feasible_ =false;
+//         Result optim_;
+        optim_info optim_info_;
 
         bool print_ = false;
         

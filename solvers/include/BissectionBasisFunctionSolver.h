@@ -23,8 +23,6 @@ class BissectionBasisFunctionSolver: public BasisFunctionSolver
     private:
 
         virtual void init(double eps);
-        
-        virtual void update_input();
 
 };
 

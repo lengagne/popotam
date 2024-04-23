@@ -44,12 +44,18 @@ void BissectionBasisFunctionSolver::evaluate(   const std::vector<Interval> &in,
     out.resize(nb_fun_);
     Result tmp;
     tmp.in = in;   
-    current_vector_.push_back(tmp);
+    tmp.out.resize(nb_fun_);
 
-    current_value_ = current_vector_.back();
-    current_vector_.pop_back();         
-    set_current_value();
+    current_evaluator_->evaluate( tmp);
+    out = tmp.out;
     
+// //     current_value_ = current_vector_.back();
+//     current_vector_.pop_back();         
+//     
+//     
+//     
+//     set_current_value();
+ /*   
     for (int i=0;i<nb_fun_;i++)
     {
         compute_intermediate_for(i);
@@ -63,31 +69,32 @@ void BissectionBasisFunctionSolver::evaluate(   const std::vector<Interval> &in,
     }else
     {
         std::cout<<"on ne calcule pas le dernier"<<std::endl;
-    }
+    }*/
 }
 
 void BissectionBasisFunctionSolver::init(double eps)
 {
     if (init_done)  return;
     BasisFunctionSolver::init(eps);
+    
+    bounds_input_ = pb_->get_input();
+    bounds_ = pb_->get_bound();
+    
+    current_evaluator_ = new EvalCurrent(pb_,bf_);
 
-    infos.resize(nb_fun_);
-    for (int i=0;i<nb_fun_;i++)
-    {
-        infos[i] = new IntervalEstimator(bf_);
-    }
-
-    if(solve_optim_)
-    {
-        info_crit_ = new IntervalEstimator( bf_);
-    }
+//     infos.resize(nb_fun_);
+//     for (int i=0;i<nb_fun_;i++)
+//     {
+//         infos[i] = new IntervalEstimator(bf_);
+//     }
+// 
+//     if(solve_optim_)
+//     {
+//         info_crit_ = new IntervalEstimator( bf_);
+//     }
+    
+    current_evaluator_->init();
     
     BasisFunctionSolver::init_end();
 }
 
-
-void BissectionBasisFunctionSolver::update_input()
-{
-
-    
-}
