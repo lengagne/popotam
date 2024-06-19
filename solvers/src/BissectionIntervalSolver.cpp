@@ -52,13 +52,15 @@ param_optim BissectionIntervalSolver::solve_optim(double eps)
     optim_info_.optim_crit_ = std::numeric_limits<double>::max();
     optim_info_.find_one_feasible_ =false;        
     cpt_iter_ = 0;
-    if (save_and_load_)
+    
+    if (warm_start_)
     {        
-        if (! load_save_filename(save_filename_,tmp))
+        if (! load_warm_start_filename(save_filename_,tmp))
         {
             current_vector_.push_back(tmp);  
+            optim_info_.optim_ = tmp;
         }
-    }
+    }    
     else
     {
         current_vector_.push_back(tmp);            

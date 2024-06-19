@@ -17,6 +17,11 @@ class MinVariance: public OptimizedBasisFunction
             
         }
         
+        std::string get_name() const
+        {
+            return "MinVariance";
+        }        
+        
     protected:
     private:
 };

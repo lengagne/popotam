@@ -543,4 +543,5 @@ void ApproxMinvoFunction::compute_basis_coeff_matrix(   const Interval& inter,
     mat = M.transpose();
     mat = re_order(mat);
     mat_inverse = mat.inverse();
+    check_matrix_quasi_null_coeff(mat,mat_inverse);
 }

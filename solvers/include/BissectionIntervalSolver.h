@@ -19,7 +19,7 @@ class BissectionIntervalSolver: public AbstractSolver
         virtual void evaluate( const std::vector<Interval> &in,
                                std::vector<Interval> &out);
 
-        virtual param_optim solve_optim(double eps=1e-3);
+        virtual param_optim solve_optim(double eps = 1e-3);
 
     protected:
     private:

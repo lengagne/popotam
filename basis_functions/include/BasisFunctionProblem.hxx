@@ -120,36 +120,62 @@ template <typename TYPE>
 TYPE BasisFunctionProblem<TYPE>::CostFunction(std::vector<TYPE>&  x)
 {
     set_matrix(x);
+    return CostFunction(A_);
     
+}
+
+template <typename TYPE>
+TYPE BasisFunctionProblem<TYPE>::CostFunction(Eigen::Matrix<TYPE,Eigen::Dynamic,Eigen::Dynamic>&  mat)
+{   
     if( criteria_type_ == "MinVo")
     {
-        TYPE det = A_.determinant();
+        
+        TYPE det = mat.determinant();
         return - det*det;
     }
     
     if (criteria_type_ == "MinNo")
     {
-        return A_.inverse().squaredNorm();        
+        return mat.inverse().squaredNorm();        
     }
     
     if (criteria_type_ == "MinVariance" || criteria_type_ == "MinVarianceB")
     {
-        Eigen::Matrix<TYPE,Eigen::Dynamic,Eigen::Dynamic> B = A_.inverse();
+        Eigen::Matrix<TYPE,Eigen::Dynamic,Eigen::Dynamic> B = mat.inverse();
+        
+//         std::cout<<"size ="<< B.rows()<<std::endl;
+        
+//         // we compute the mediane
+//         Eigen::Matrix<TYPE,Eigen::Dynamic,1> lin(n_);
+//         for (int i=0;i<n_;i++)
+//             lin(i) = 0;
+//         for (int i=0;i<n_;i++)
+//             for (int j=0;j<n_;j++)
+//                 lin(i) += B(j,i);            
+//         for (int i=0;i<n_;i++)
+//             lin(i) /= n_;
+//         
+//         TYPE out = 0;
+//         for (int i=0;i<n_;i++)
+//             for (int j=0;j<n_;j++)
+//                 out += pow( B(j,i)-lin(i) ,2);
+        
         // we compute the mediane
-        Eigen::Matrix<TYPE,Eigen::Dynamic,1> lin(n_);
-        for (int i=0;i<n_;i++)
+        uint s = B.rows();
+        Eigen::Matrix<TYPE,Eigen::Dynamic,1> lin(s);
+        for (int i=0;i<s;i++)
             lin(i) = 0;
-        for (int i=0;i<n_;i++)
-            for (int j=0;j<n_;j++)
+        for (int i=0;i<s;i++)
+            for (int j=0;j<s;j++)
                 lin(i) += B(j,i);            
-        for (int i=0;i<n_;i++)
-            lin(i) /= n_;
+        for (int i=0;i<s;i++)
+            lin(i) /= s;
         
         TYPE out = 0;
-        for (int i=0;i<n_;i++)
-            for (int j=0;j<n_;j++)
-                out += pow( B(j,i)-lin(i) ,2);
-            
+        for (int i=0;i<s;i++)
+            for (int j=0;j<s;j++)
+                out += pow( B(j,i)-lin(i) ,2);        
+        
         return out;        
     }
 

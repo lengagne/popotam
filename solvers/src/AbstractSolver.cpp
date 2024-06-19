@@ -154,11 +154,11 @@ void AbstractSolver::prepare_files(const std::string& filename)
     file_open = true;
 }
 
-bool AbstractSolver::load_save_filename( const std::string& filename,
+bool AbstractSolver::load_warm_start_filename( const std::string& filename,
                                         const Result& res
 )
 {
-    std::cout<<"We load the current filename : "<< save_filename_ <<std::endl;
+    std::cout<<"We load the current filename : "<< warm_start_filename_ <<std::endl;
   // Convertir std::string en QString
     QString qFileName = QString::fromStdString(filename);
     // Créer un objet QFile
@@ -195,9 +195,9 @@ bool AbstractSolver::load_save_filename( const std::string& filename,
              cpt_iter_ = Child.attribute("cpt_iter").toLong(); 
              save_each_iter_ = Child.attribute("save_each_iter").toLong(); 
              saved_iter_ = Child.attribute("saved_iter_").toLong(); 
-             std::cout<<"load cpt_iter_ "<< cpt_iter_ <<std::endl;
-             std::cout<<"load save_each_iter_ "<< save_each_iter_ <<std::endl;
-             std::cout<<"load saved_iter_ "<< saved_iter_ <<std::endl;
+//              std::cout<<"load cpt_iter_ "<< cpt_iter_ <<std::endl;
+//              std::cout<<"load save_each_iter_ "<< save_each_iter_ <<std::endl;
+//              std::cout<<"load saved_iter_ "<< saved_iter_ <<std::endl;
          }
          
          if (Child.tagName()=="pile")
@@ -224,10 +224,11 @@ bool AbstractSolver::load_save_filename( const std::string& filename,
     
     // update filename for saving 
     
-    save_filename_ = update_filename(filename);
+    warm_start_filename_ = update_filename(filename);
     
     return true;
 }
+
 
 void AbstractSolver::save_current_state( const std::string& filename)
 {        
@@ -330,12 +331,17 @@ param_optim AbstractSolver::set_results()
     return out;
 }
 
-void AbstractSolver::set_save_filename( const std::string& s)
+void AbstractSolver::set_warm_start_filename( const std::string& s)
 {
-    save_and_load_ = true;
-    save_filename_ = s;
+    if (s == "no_warm_start")
+    {
+        warm_start_ = false;        
+    }else
+    {
+        warm_start_ = true;
+        warm_start_filename_ = s;
+    }
 }
-
 
 param_optim AbstractSolver::solve()
 {

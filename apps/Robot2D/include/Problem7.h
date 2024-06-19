@@ -11,7 +11,7 @@ class Problem7 : public AbstractCSP
         Problem7(unsigned int n,double X, double Y):AbstractCSP()
         {
 			nb_dof_ = n;
-            pb_name_ = "Problem7_X"+std::to_string(X)+"_Y_"+std::to_string(Y);
+            pb_name_ = "2D_Problem7_Ndof"+std::to_string(nb_dof_)+"_X"+std::to_string(X)+"_Y"+std::to_string(Y);
             Xt = X;
             Yt = Y;
             get_criteria_ = true;

@@ -40,15 +40,16 @@ class IntervalEstimator{
             return depend_intermediate_;
         }
         
-        uint get_index_current_control_points() const
+        double get_score_from_current_control_points() const
         {
-            return index_current_control_points_;
+            return (1.0*index_current_control_points_)/nb_control_point_inputs_;
+//             return index_current_control_points_;
         }
         
-        uint get_nb_control_point_inputs() const
-        {
-            return nb_control_point_inputs_;
-        }
+//         uint get_nb_control_point_inputs() const
+//         {
+//             return nb_control_point_inputs_;
+//         }
 
     unsigned int nb_in_;
     std::vector<MogsInterval*> dep_;

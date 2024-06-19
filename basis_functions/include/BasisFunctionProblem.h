@@ -26,6 +26,8 @@ public :
 
         TYPE CostFunction(std::vector<TYPE>&  x);
         
+        TYPE CostFunction(Eigen::Matrix<TYPE,Eigen::Dynamic,Eigen::Dynamic>&  mat);
+        
         void GetConstraintLimits( std::vector<double>& low, 
                                   std::vector<double>& high);
        

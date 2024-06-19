@@ -12,7 +12,7 @@ class Problem4Torque : public AbstractCSP
         Problem4Torque(unsigned int n,double X, double Y):AbstractCSP()
         {
 			nb_dof_ = n;
-            pb_name_ = "Problem4Torque_X"+std::to_string(X)+"_Y_"+std::to_string(Y);
+            pb_name_ = "2D_ProblemTorque4_Ndof"+std::to_string(nb_dof_)+"_X"+std::to_string(X)+"_Y"+std::to_string(Y);
             Xt = X;
             Yt = Y;
             get_criteria_ = true;

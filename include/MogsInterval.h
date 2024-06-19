@@ -17,7 +17,7 @@
 
 // typedef double Real;
 
-typedef enum {SON_COS_ERROR, SON_SIN_ERROR, SON_SIN_COS_ERROR,SON_SIGNOF_ERROR /*,DIVIDE_ERROR,*/} sons_type;
+typedef enum {SON_COS_ERROR, SON_SIN_ERROR, SON_SIGNOF_ERROR /*,DIVIDE_ERROR,*/} sons_type;
 
 typedef enum  { INSIDE, OUTSIDE, OVERLAP }  check_constraint;
 
@@ -69,6 +69,28 @@ public:
 };
 
 std::ostream& operator<< (std::ostream& stream, const mem& m);
+
+bool compareMogsById(MogsInterval* a, MogsInterval* b) ;
+
+struct compareMemPtr {
+    bool operator()(const mem* a, const mem* b) const {
+        
+        auto it1 = a->sons.begin();
+        auto it2 = b->sons.begin();
+        while (it1 != a->sons.end() && it2 != b->sons.end()) {
+            if (compareMogsById(*it1, *it2)) {
+                return false; // list1 a un élément plus petit
+            }
+            if (compareMogsById(*it2, *it1)) {
+                return true;  // list2 a un élément plus petit
+            }
+            ++it1;
+            ++it2;
+        }        
+        return ( a->sons < b->sons);
+    }
+};
+
 
 bool operator==(const mem& a, const mem&b);
 
@@ -235,7 +257,7 @@ class MogsInterval
         
         void update_error_cos(const Interval & in);
         void update_error_sin(const Interval & in);
-        void update_error_sin_cos(const Interval & in);
+//         void update_error_sin_cos(const Interval & in);
         void update_error_sign_of(const Interval & in);
         void update_error_division(const Interval & in);        
 
@@ -317,6 +339,14 @@ void merge_dependancies(std::vector<MogsInterval*> &dep1,
                         std::vector<unsigned int> & order2);
 
 
+double pow2( double a);
+
+MogsInterval pow2( const MogsInterval& a);
+
+LazyVariable pow2( const LazyVariable& a);
+
+Interval pow2( const Interval& a);
+
 template <typename T1, typename T2>
 T1 approx_taylor_division( const T1& num, const T2& middle_num, const T1& den, const T2& middle_den)
 {    
@@ -341,7 +371,7 @@ T1 approx_taylor_cos( const T1& value, const T2& middle)
     T1 a = value - middle;
     return  cos( middle)
             - a*  sin(middle);
-//             - a*a*  cos(middle) /2;
+//             - pow2(a)*  cos(middle) /2;
 //            + a*a*a*  sin(middle) /6;
 //            + a*a*a*a*  cos(middle) /24
 //            - a*a*a*a*a*  sin(middle) /120;
@@ -353,7 +383,7 @@ T1 approx_taylor_sin( const T1& value, const T2& middle)
     T1 a = value - middle;
     return  sin( middle)
             + a*  cos(middle);
-//             - a*a* sin(middle) /2;
+//             - pow2(a)* sin(middle) /2;
 //             - a*a*a* cos(middle) /6;
 //            + a*a*a*a* sin(middle) /24
 //            + a*a*a*a*a*  cos(middle) /120;

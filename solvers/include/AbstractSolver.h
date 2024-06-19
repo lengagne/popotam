@@ -60,11 +60,13 @@ class AbstractSolver
                                 
         virtual void init_option();
                                 
-        bool load_save_filename( const std::string& s,
-                                const Result & res  // is initialized
-        );     
+        bool load_warm_start_filename(  const std::string& s,
+                                        const Result & res  // is initialized
+        );       
+
+        virtual param_optim solve( );
         
-        virtual param_optim solve();
+        virtual param_optim solve_optim(double eps = 1e-3)=0;
         
         void prepare_files(const std::string& filename);
                                 
@@ -87,14 +89,12 @@ class AbstractSolver
             options_ = options;
         }
         
-        void set_save_filename( const std::string& s);
+        void set_warm_start_filename( const std::string& s);
         
         std::string update_filename( const std::string& filename); // check the filename and update version.
 
     protected:
-        
-        virtual param_optim solve_optim(double eps=1e-3) = 0;
-        
+               
         SolverOptions options_;
         
         AbstractCSP *pb_;
@@ -133,8 +133,9 @@ class AbstractSolver
         
         uint bissection_type_ = 0;
         
-        bool save_and_load_ = false;
-        std::string save_filename_ = "no_save";
+        bool warm_start_ = false;
+        std::string warm_start_filename_ = "no_warm_start";
+        std::string save_filename_ = "OptimTemporaryFile";
                
     private:
 

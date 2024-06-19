@@ -1,19 +1,19 @@
-#ifndef RecursiveBSplinesFunction2_H
-#define RecursiveBSplinesFunction2_H
+#ifndef RecursiveFunction_H
+#define RecursiveFunction_H
 
 #include "AbstractBasisFunction.h"
 #include "Polynomial.h"
 
-class RecursiveBSplinesFunction2: public AbstractBasisFunction
+class RecursiveFunction: public AbstractBasisFunction
 {
     public:
        
-        RecursiveBSplinesFunction2(): AbstractBasisFunction()
+        RecursiveFunction(): AbstractBasisFunction()
         {
 
         }         
         
-        ~RecursiveBSplinesFunction2()
+        ~RecursiveFunction()
         {
             
         }
@@ -22,7 +22,12 @@ class RecursiveBSplinesFunction2: public AbstractBasisFunction
                                                 uint order,
                                                 Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat,
                                                 Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat_inverse);
-
+        
+        std::string get_name() const
+        {
+            return "Recursive";
+        }
+        
     protected:
     private:
 };

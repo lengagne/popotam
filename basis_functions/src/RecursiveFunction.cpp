@@ -1,8 +1,8 @@
-#include "RecursiveBSplinesFunction2.h"
+#include "RecursiveFunction.h"
 #include "utils.h"
 
 
-void RecursiveBSplinesFunction2::compute_basis_coeff_matrix( const Interval& inter,
+void RecursiveFunction::compute_basis_coeff_matrix( const Interval& inter,
                                                 uint order,
                                                 Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat,
                                                 Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat_inverse)
@@ -24,15 +24,15 @@ void RecursiveBSplinesFunction2::compute_basis_coeff_matrix( const Interval& int
     std::vector<Poly> basis(order+1);
     for (int i=0;i<order;i++)    
     {
-        basis[i] = ttmp * t2;
-        ttmp = ttmp * t1;
+        basis[i] = ttmp * t1;
+        ttmp = ttmp * t2;
     }
     basis[order] = ttmp;
     
     for(int i=0;i<order+1;i++)
         for (int k=0;k<order+1;k++)
             mat(k,i) =  basis[i].getValue(k);
-    
+
     mat = re_order(mat);
     mat_inverse =mat.inverse();
 }

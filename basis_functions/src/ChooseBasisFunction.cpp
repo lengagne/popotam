@@ -6,8 +6,8 @@
 #include "MinVariance.h"
 #include "BernsteinFunction.h"
 #include "BSplinesFunction.h"
-#include "RecursiveBSplinesFunction.h"
-#include "RecursiveBSplinesFunction2.h"
+#include "RecursiveFunction.h"
+#include "RecursiveFunction2.h"
 
 
 ChooseBasisFunction::ChooseBasisFunction()
@@ -81,14 +81,14 @@ void ChooseBasisFunction::choose(AbstractBasisFunction** bf,
    
     if (basis_type == "RecursiveBSplines")    
     {
-        *bf = new RecursiveBSplinesFunction(); 
+        *bf = new RecursiveFunction(); 
         return;
     }
 
 
     if (basis_type == "RecursiveBSplines2")
     {
-        *bf = new RecursiveBSplinesFunction2(); 
+        *bf = new RecursiveFunction2(); 
         return;
     }
     

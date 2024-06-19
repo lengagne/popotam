@@ -17,6 +17,11 @@ class ApproxMinvoFunction: public AbstractBasisFunction
                                                 uint order,
                                                 Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat,
                                                 Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat_inverse);
+        
+        std::string get_name() const
+        {
+            return "ApproxMinVo";
+        }
 
     protected:
     private:

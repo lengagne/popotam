@@ -231,9 +231,10 @@ check_constraint IntervalEstimator::update_from_inputs( Result& res, Interval& b
     double ss = Sup(bound);
     double ii = Inf(bound);
     unsigned int cpt = 0;
-    bool inf_inside,sup_inside, both_side;
-    
+    bool inf_inside,sup_inside, both_side;    
     Interval Iv = LazyUpdateOutput(num_out_,cpt++);
+    
+    index_current_control_points_ = 0;
     for (int i=1;i<nb_control_point_inputs_;i++)
     {
         Interval value = LazyUpdateOutput(num_out_,cpt++);
@@ -245,12 +246,10 @@ check_constraint IntervalEstimator::update_from_inputs( Result& res, Interval& b
         
         double iv = Inf(Iv);
         double sv = Sup(Iv);
-
         
         inf_inside = (iv >= ii && iv <= ss);
         sup_inside = (sv >= ii && sv <= ss);       
         both_side = (iv <= ii && sv >= ss);
-        
        
         if ( inf_inside != sup_inside || both_side)
         {

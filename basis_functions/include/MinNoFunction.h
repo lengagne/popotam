@@ -17,6 +17,11 @@ class MinNoFunction: public OptimizedBasisFunction
             
         }
         
+        std::string get_name() const
+        {
+            return "MinNo";
+        }        
+        
     protected:
     private:
 };

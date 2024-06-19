@@ -1,9 +1,6 @@
 #include "MogsInterval.h"
 #include "MogsIntervalChief.h"
 
-
-
-
 MogsIntervalChief interval_chief_;
 unsigned long long nb_mogs_intervals_ = 0;
 
@@ -232,9 +229,8 @@ MogsInterval::MogsInterval(const double & d)
 MogsInterval::MogsInterval(const MogsInterval & in):value_(in.value_), name_(in.name_),
                                                     the_sons_(in.the_sons_),is_an_error_(in.is_an_error_),
                                                     is_input_(in.is_input_),
-                                                    /*level_(in.level_),*/
                                                     is_an_intermediare(in.is_an_intermediare),
-                                                    id_intermediate_(in.id_intermediate_)
+                                                   id_intermediate_(in.id_intermediate_)
 {
     id_ = nb_mogs_intervals_++;
     for(std::map<mem*,LazyVariable>::const_iterator itmem = in.dependances_.begin(); itmem != in.dependances_.end(); itmem++)
@@ -277,6 +273,7 @@ void MogsInterval::add (const LazyVariable&in, mem * m)
 MogsInterval MogsInterval::add_intermediate( const MogsInterval & inter,
                                              const unsigned int M)
 {
+//     std::cout<<"add_intermediate inter = "<< inter <<std::endl;
     return interval_chief_.add_intermediate(inter,M);
 }
 
@@ -489,6 +486,7 @@ unsigned int MogsInterval::guess_size() const
     unsigned int s = 1;
     for (int i=0;i<order.size();i++)
         s*= order[i]+1;
+//     std::cout<<"guess_size() : "<< s <<std::endl;
     return s;
 }
 
@@ -551,9 +549,9 @@ void MogsInterval::prepare_son(const sons_type& type)
             the_sons_[nb].son->is_error();
             the_sons_[nb].son->init(Hull(-1,1),"ers_"+name_);
             break;
-        case(SON_SIN_COS_ERROR):
-            the_sons_[nb].son->is_error();
-            the_sons_[nb].son->init(Hull(-1,1),"ersc_"+name_);
+//         case(SON_SIN_COS_ERROR):
+//             the_sons_[nb].son->is_error();
+//             the_sons_[nb].son->init(Hull(-1,1),"ersc_"+name_);
             break;
         case(SON_SIGNOF_ERROR):
             the_sons_[nb].son->is_error();
@@ -584,9 +582,11 @@ void MogsInterval::update(const Interval & in)
 {
     value_.update(in);
     middle_ = Mid(in);
-    LazyUpdateInput( middle_.ref_->id_, Mid(in));    
+    LazyUpdateInput( middle_.creator_->id_, Mid(in));
+//     LazyUpdateInput( middle_.ref_->id_, Mid(in));        
     diam_ = Diam(in);
-    LazyUpdateInput( diam_.ref_->id_, Diam(in));
+    LazyUpdateInput( diam_.creator_->id_, Diam(in));
+//     LazyUpdateInput( diam_.ref_->id_, Diam(in));
     
     ref_->value_ = Hull(-1,1);
     for (int i=0;i<the_sons_.size();i++)
@@ -601,10 +601,10 @@ void MogsInterval::update(const Interval & in)
 //                             std::cout<<"SON_SIN_ERROR"<<std::endl;
                             the_sons_[i].son->update_error_sin(in); // ,v);
                             break;
-            case(SON_SIN_COS_ERROR):  
-//                             std::cout<<"SON_SIN_COS_ERROR"<<std::endl;
-                            the_sons_[i].son->update_error_sin_cos(in); // ,v);
-                            break;
+//             case(SON_SIN_COS_ERROR):  
+// //                             std::cout<<"SON_SIN_COS_ERROR"<<std::endl;
+//                             the_sons_[i].son->update_error_sin_cos(in); // ,v);
+//                             break;
             case(SON_SIGNOF_ERROR):  
 //                             std::cout<<"SON_SIGNOF_ERROR"<<std::endl;
                             the_sons_[i].son->update_error_sign_of(in); // ,v);
@@ -672,6 +672,7 @@ MogsInterval MogsInterval::operator= (const MogsInterval& in)
         is_input_ = in.is_input_;
 //         level_ = in.level_;
         is_an_intermediare = in.is_an_intermediare;
+        id_ = in.id_;
         id_intermediate_ = in.id_intermediate_;
         if(is_input_)
         {
@@ -702,6 +703,7 @@ MogsInterval MogsInterval::operator- (const MogsInterval& I) const
     for(std::map<mem*,LazyVariable>::const_iterator itmem = I.dependances_.begin(); itmem != I.dependances_.end(); itmem++)
         out.dependances_[itmem->first] -= itmem->second;
 
+    // std::cout<<"operator- : "<< out <<std::endl;
     if(out.guess_size() > MAXSIZE)
     {
         MogsInterval new_intermediate = add_intermediate(out);
@@ -717,7 +719,10 @@ MogsInterval MogsInterval::operator+ (const MogsInterval& I) const
     for(std::map<mem*,LazyVariable>::const_iterator itmem = dependances_.begin(); itmem != dependances_.end(); itmem++)
         out.dependances_[itmem->first] = itmem->second;
     for(std::map<mem*,LazyVariable>::const_iterator itmem = I.dependances_.begin(); itmem != I.dependances_.end(); itmem++)
+    {
         out.dependances_[itmem->first] += itmem->second;
+    }
+    // std::cout<<"operator+ : "<< out <<std::endl;
     if(out.guess_size() > MAXSIZE)
     {
         MogsInterval new_intermediate = add_intermediate(out);
@@ -729,9 +734,13 @@ MogsInterval MogsInterval::operator+ (const MogsInterval& I) const
 void MogsInterval::operator+= (const MogsInterval& I)
 {
     for(std::map<mem*,LazyVariable>::const_iterator itmem = I.dependances_.begin(); itmem != I.dependances_.end(); itmem++)
-        dependances_[itmem->first] += itmem->second;
-
-   if(guess_size() > MAXSIZE)
+    {
+        dependances_[itmem->first] += itmem->second;    
+    }    
+    // We must need to add this line to consider new variable !!
+    id_ = nb_mogs_intervals_++;
+    // std::cout<<"operator+= : "<< *this <<std::endl;
+    if(guess_size() > MAXSIZE)
     {
         *this =  add_intermediate(*this);
     }
@@ -741,7 +750,10 @@ void MogsInterval::operator-= (const MogsInterval& I)
 {
     for(std::map<mem*,LazyVariable>::const_iterator itmem = I.dependances_.begin(); itmem != I.dependances_.end(); itmem++)
         dependances_[itmem->first] -= itmem->second;
-   if(guess_size() > MAXSIZE)
+    // We must need to add this line to consider new variable !!
+    id_ = nb_mogs_intervals_++;    
+    // std::cout<<"operator-= : "<< *this <<std::endl;
+    if(guess_size() > MAXSIZE)
     {
         *this =  add_intermediate(*this);
     }
@@ -754,12 +766,15 @@ MogsInterval MogsInterval::operator* (const double& d) const
         return 0.0;        
     }
     if (d==1.0)
+    {
         return *this;
+    }
     
     MogsInterval out = *this;
     out.value_ *= d;
     for(std::map<mem*,LazyVariable>::iterator itmem = out.dependances_.begin(); itmem != out.dependances_.end(); itmem++)
         itmem->second *= d;
+
     return out;
 }
 
@@ -768,7 +783,8 @@ MogsInterval MogsInterval::operator* (const LazyVariable& d) const
     MogsInterval out = *this;
     for(std::map<mem*,LazyVariable>::iterator itmem = out.dependances_.begin(); itmem != out.dependances_.end(); itmem++)
         itmem->second *= d;
-   if(out.guess_size() > MAXSIZE)
+    // std::cout<<"operator* : "<< out <<std::endl;
+    if(out.guess_size() > MAXSIZE)
     {
         return add_intermediate(out);
     }
@@ -778,6 +794,8 @@ MogsInterval MogsInterval::operator* (const LazyVariable& d) const
 
 MogsInterval MogsInterval::operator* (const MogsInterval& in) const
 {
+//     std::cout<<"Operator * this : "<< *this <<std::endl;
+//     std::cout<<"Operator * in : "<< in <<std::endl;
     if (in == 0.0)
     {
         return 0.0;
@@ -794,7 +812,7 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
     {
         return in;        
     }
-   
+   // std::cout<<"operator- : "<< out <<std::endl;
     if(guess_size() > MAXSIZE && in.guess_size() > MAXSIZE)
     {
         MogsInterval i1 = add_intermediate(*this);
@@ -821,7 +839,7 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
                 tmp->sons.push_back(*it);
                 tmp->sons.push_back(*it);
             }
-            tmp->sons.sort();
+            tmp->sons.sort(compareMogsById);
             mem* good = interval_chief_.check_input(tmp);
             out.dependances_[good] += it1->second * it1->second;
 
@@ -835,7 +853,7 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
                 tmp->sons.push_back(*it);
                 for(std::list<MogsInterval*>::const_iterator it = m2.sons.begin(); it != m2.sons.end(); it++)
                 tmp->sons.push_back(*it);
-                tmp->sons.sort();
+                tmp->sons.sort(compareMogsById);
                 mem* good = interval_chief_.check_input(tmp);
                 out.dependances_[good] += it1->second * it2->second *2.0;
             }
@@ -862,7 +880,7 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
 
             for(std::list<MogsInterval*>::const_iterator it = m2.sons.begin(); it != m2.sons.end(); it++)
                 tmp->sons.push_back(*it);
-            tmp->sons.sort();
+            tmp->sons.sort(compareMogsById);
             mem* good = interval_chief_.check_input(tmp);
             out.dependances_[good] += it1->second * it2->second;
         }
@@ -872,19 +890,19 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
         MogsInterval new_intermediate = add_intermediate(out);
         return new_intermediate;
     }
-    
+//     std::cout<<"Operator * out : "<< out <<std::endl;
     return out;
 }
 
 std::ostream& operator<< (std::ostream& stream, const MogsInterval& inter)
 {
     stream<<"("<<inter.name_<<") = "<< inter.value_;
-    stream<<"  mid = "<< inter.middle_;
-    stream<<"  diam = "<< inter.diam_;
+//     stream<<"  mid = "<< inter.middle_;
+//     stream<<"  diam = "<< inter.diam_;
     stream<<std::endl;
     unsigned int cpt=1;
     for(std::map<mem*,LazyVariable>::const_iterator itmem = inter.dependances_.begin(); itmem != inter.dependances_.end(); itmem++)
-        stream<<"\t M("<<cpt++<<") = " << itmem->second<<"\t" << *(itmem->first)<<std::endl;
+        stream<<"\t M("<<cpt++<<") = " << itmem->second<<"\t type : " << *(itmem->first)<<std::endl;
     
 //     stream<<"  nb sons = "<< inter.the_sons_.size();
     
@@ -895,13 +913,17 @@ void MogsInterval::update_error_cos(const Interval  & in) //, std::vector<Real>&
 {
     /// FIXME we assume the largest error is at the extremum
     Real m = Mid(in);
-    Real binf = approx_taylor_cos<Real,Real>(Inf(in),m);
-    Real bsup = approx_taylor_cos<Real,Real>(Sup(in),m);
+//     Real binf = approx_taylor_cos<Real,Real>(Inf(in),m);
+//     Real bsup = approx_taylor_cos<Real,Real>(Sup(in),m);
+// 
+//     Interval approx = Hull( Hull(binf,bsup), cos(m));
+//     Interval reel = cos(in);
+//     value_ = Hull(Hull(Inf(reel)-Inf(approx),Sup(reel)-Sup(approx)),0);
 
-    Interval approx = Hull( Hull(binf,bsup), cos(m));
-    Interval reel = cos(in);
-    value_ = Hull(Hull(Inf(reel)-Inf(approx),Sup(reel)-Sup(approx)),0);
-
+    Real inf_error = cos (Inf(in)) - approx_taylor_cos<Real,Real>(Inf(in),m);
+    Real sup_error = cos (Sup(in)) - approx_taylor_cos<Real,Real>(Sup(in),m);
+    value_ = Hull(Hull(inf_error,sup_error),0);    
+    
     update(value_);
 }
 
@@ -914,39 +936,43 @@ void MogsInterval::update_error_sin(const Interval  & in) //, std::vector<Real>&
 {
     /// FIXME we assume the largest error is at the extremum
     Real m = Mid(in);
-    Real binf = approx_taylor_sin<Real,Real>(Inf(in),m);
-    Real bsup = approx_taylor_sin<Real,Real>(Sup(in),m);
+//     Real binf = approx_taylor_sin<Real,Real>(Inf(in),m);
+//     Real bsup = approx_taylor_sin<Real,Real>(Sup(in),m);
+// 
+//     Interval approx = Hull( Hull(binf,bsup), sin(m));
+//     Interval reel = sin(in);
+//     value_ = Hull(Hull(Inf(reel)-Inf(approx),Sup(reel)-Sup(approx)),0);
 
-    Interval approx = Hull( Hull(binf,bsup), sin(m));
-    Interval reel = sin(in);
-    value_ = Hull(Hull(Inf(reel)-Inf(approx),Sup(reel)-Sup(approx)),0);
-
+    Real inf_error = sin (Inf(in)) - approx_taylor_sin<Real,Real>(Inf(in),m);
+    Real sup_error = sin (Sup(in)) - approx_taylor_sin<Real,Real>(Sup(in),m);
+    value_ = Hull(Hull(inf_error,sup_error),0);
+    
     update(value_);
 }
 
-void MogsInterval::update_error_sin_cos(const Interval  & in) //, std::vector<Real>& v )
-{
-    /// FIXME we assume the largest error is at the extremum
-
-    Real m = Mid(in);
-    Real binf = approx_taylor_cos<Real,Real>(Inf(in),m);
-    Real bsup = approx_taylor_cos<Real,Real>(Sup(in),m);
-
-    Interval approx = Hull( Hull(binf,bsup), cos(m));
-    Interval reel = cos(in);
-    Interval valuecos_ = Hull(Hull(Inf(reel)-Inf(approx),Sup(reel)-Sup(approx)),0);
-
-    binf = approx_taylor_sin<Real,Real>(Inf(in),m);
-    bsup = approx_taylor_sin<Real,Real>(Sup(in),m);
-
-    approx = Hull( Hull(binf,bsup), sin(m));
-    reel = sin(in);
-    Interval valuesin_ = Hull(Hull(Inf(reel)-Inf(approx),Sup(reel)-Sup(approx)),0);
-
-    value_ = Hull(valuesin_,valuecos_);
-
-    update(value_);
-}
+// void MogsInterval::update_error_sin_cos(const Interval  & in) //, std::vector<Real>& v )
+// {
+//     /// FIXME we assume the largest error is at the extremum
+// 
+//     Real m = Mid(in);
+//     Real binf = approx_taylor_cos<Real,Real>(Inf(in),m);
+//     Real bsup = approx_taylor_cos<Real,Real>(Sup(in),m);
+// 
+//     Interval approx = Hull( Hull(binf,bsup), cos(m));
+//     Interval reel = cos(in);
+//     Interval valuecos_ = Hull(Hull(Inf(reel)-Inf(approx),Sup(reel)-Sup(approx)),0);
+// 
+//     binf = approx_taylor_sin<Real,Real>(Inf(in),m);
+//     bsup = approx_taylor_sin<Real,Real>(Sup(in),m);
+// 
+//     approx = Hull( Hull(binf,bsup), sin(m));
+//     reel = sin(in);
+//     Interval valuesin_ = Hull(Hull(Inf(reel)-Inf(approx),Sup(reel)-Sup(approx)),0);
+// 
+//     value_ = Hull(valuesin_,valuecos_);
+// 
+//     update(value_);
+// }
 
 void MogsInterval::update_error_sign_of(const Interval & in) // , std::vector<Real>& v)
 {
@@ -1096,3 +1122,33 @@ MogsInterval sign_of(const MogsInterval& in)
     return *er;    
     
 }
+
+double pow2( double a)
+{
+    return pow(a,2);
+}
+
+LazyVariable pow2( const LazyVariable& a)
+{
+    return a*a;
+}
+
+MogsInterval pow2( const MogsInterval& a)
+{
+    return a*a;
+}
+
+Interval pow2( const Interval& a)
+{
+    if ( Inf(a)<0 && Sup(a)>0)
+        return Hull( Hull( pow(Inf(a),2),pow(Sup(a),2)),0);
+    return Hull( pow(Inf(a),2),pow(Sup(a),2));
+}
+
+bool compareMogsById(MogsInterval* a, MogsInterval* b)
+{
+    if (a->id_ < b->id_)    return true;
+    if (a->id_ > b->id_)    return false;
+    return a->name_ < b->name_;
+}
+

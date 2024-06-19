@@ -31,15 +31,15 @@ void OptimizedBasisFunction::compute_basis_coeff_matrix(const Interval& inter,
             exit(2);
         }
     
-        app->Options()->SetIntegerValue("print_level", 0);
+//         app->Options()->SetIntegerValue("print_level", 6);
 //         app->Options()->SetStringValue("linear_solver", "ma57");
         app->Options()->SetIntegerValue("max_iter", 10000);
         app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-        app->Options()->SetStringValue("expect_infeasible_problem", "no");
-        app->Options()->SetIntegerValue("print_frequency_iter", 1000);
-        app->Options()->SetNumericValue("tol", 1e-8);      
-        app->Options()->SetNumericValue("acceptable_tol", 1e-8);      
-        app->Options()->SetNumericValue("bound_relax_factor", 0);      
+//         app->Options()->SetStringValue("expect_infeasible_problem", "no");
+//         app->Options()->SetIntegerValue("print_frequency_iter", 1000);
+        app->Options()->SetNumericValue("tol", 1e-12);      
+        app->Options()->SetNumericValue("acceptable_tol", 1e-12);      
+//         app->Options()->SetNumericValue("bound_relax_factor", 0);      
         
         
         

@@ -6,6 +6,8 @@
 #include "Interval.h"
 #include <map>
 
+#define BS_THRESHOLD  	std::numeric_limits<double>::epsilon()
+
 class AbstractBasisFunction
 {
     public:
@@ -26,6 +28,9 @@ class AbstractBasisFunction
             mat_inverse_order_.clear();
         }
         
+        // function used in case of numerically given values (0 is not really 0)
+        void check_matrix_quasi_null_coeff( Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat,
+                                            Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat_inverse);
     
         void get_basis_coeff_matrix( const Interval& inter,
                                     uint order,
@@ -34,6 +39,8 @@ class AbstractBasisFunction
         
         void get_time_max( const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& mat,
                            Eigen::Matrix<double,Eigen::Dynamic,1>& tmax);
+        
+        virtual std::string get_name() const = 0;
     
     protected:
         

@@ -7,8 +7,8 @@
 #include "BissectionIntervalSolver.h"
 #include "BissectionBasisFunctionSolver.h"
 #include "DiscretizationSolver.h"
-#include "ContractionIntervalSolver.h"
-#include "ContractionBasisFunctionSolver.h"
+// #include "ContractionIntervalSolver.h"
+// #include "ContractionBasisFunctionSolver.h"
 
 #include "ChooseBasisFunction.h"
 

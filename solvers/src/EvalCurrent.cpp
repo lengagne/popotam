@@ -103,7 +103,7 @@ void EvalCurrent::init()
     if(solve_optim_)
     {
         std::list<uint> tmp = info_crit_->get_dep_intermediate();
-        intermediate_needed_[nb_fun_] = tmp;        
+        intermediate_needed_[nb_fun_].clear();
         get_all_intermediate_dependancies(tmp, intermediate_needed_[nb_fun_]);        
     }
 
@@ -134,8 +134,7 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
     if(info.find_one_feasible_)  // if one solution found check if we can found better
     {
         compute_intermediate_for(nb_fun_);            
-        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_); 
-        info.additionnal_score += info_crit_->get_index_current_control_points();
+        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);         
     }
 
     if( type_optim != OUTSIDE)
@@ -148,7 +147,7 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
             {
                 compute_intermediate_for(i);
                 check_constraint ctr = infos[i]->update_from_inputs(current_value_, bounds_[i],i);
-                info.additionnal_score += infos[i]->get_index_current_control_points();                
+                info.additionnal_score += infos[i]->get_score_from_current_control_points();                
                 
                 switch(ctr)    
                 {
@@ -169,6 +168,9 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
                 if(type==OUTSIDE)
 //                     if(type==OUTSIDE || type ==OVERLAP)
                     break;
+            }else
+            {
+                info.additionnal_score += 1.0; 
             }
         }      
                     
@@ -182,9 +184,8 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
                                 {
                                     compute_intermediate_for(nb_fun_);
                                     type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);
-                                    info.additionnal_score += info_crit_->get_index_current_control_points();
                                 }
-                                
+                                info.additionnal_score += info_crit_->get_score_from_current_control_points();
                                switch(type_optim)
                                {
                                    case(INSIDE):

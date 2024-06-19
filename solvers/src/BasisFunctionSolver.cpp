@@ -88,9 +88,9 @@ void BasisFunctionSolver::init_end()
 
     cpt_iter_ = 0;
     saved_iter_ = 0;
-    if (save_and_load_)
+    if (warm_start_)
     {        
-        if (! load_save_filename(save_filename_,tmp))
+        if (! load_warm_start_filename(save_filename_,tmp))
         {
             current_vector_.push_back(tmp);  
             optim_info_.optim_ = tmp;
@@ -360,6 +360,7 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
         
         
         do{
+//             std::cout<<"\n start do "<<std::endl;
             std::vector<Result> eval_first;
             std::vector<Result> eval_vector;
 //             std::vector<double> score;
@@ -367,7 +368,7 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
             // on crée le vecteur à partir de la pile.           
             eval_first.push_back(current_vector_.back());
             current_vector_.pop_back();  
-            bissect(eval_first,eval_vector,4);            
+            bissect(eval_first,eval_vector,3);            
             
             std::vector<double> to_proceed(eval_vector.size());
             std::vector<optim_info> set_infos(eval_vector.size());
@@ -424,7 +425,7 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
                         max = set_infos[j].additionnal_score;
                     }
                 }
-//                 std::cout<<"choose : "<< index_worst <<std::endl;
+//                 std::cout<<"choose : "<< index_worst <<std::endl<<std::endl;
 //                 std::cout<<"store : "<< max <<std::endl;
                 current_vector_.push_back(eval_vector[index_worst]);
                 eval_vector.erase( eval_vector.begin()+index_worst);            
