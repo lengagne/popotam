@@ -1,5 +1,21 @@
 #include "PopotamOptions.h"
 
+PopotamOptions::PopotamOptions()
+{
+//     add_type_int("nb_random");
+}
+
+void PopotamOptions::add_option(const std::string& name, 
+                                const std::string& value)
+{
+    auto it = list_options_.find(name);
+    if (it != list_options_.end()) {
+        std::cout<<"The option "<< name <<" was already set : we define the new value : "<< value<<std::endl;
+    } 
+    
+    list_options_[name] = value;
+}
+/*
 void PopotamOptions::add_double_option(  const std::string& name, 
                                         double value)
 {
@@ -32,15 +48,15 @@ void PopotamOptions::add_string_option(  const std::string& name,
     } 
     
     string_options_[name] = value;
-}
+}*/
 
 bool PopotamOptions::get_double_value(   const std::string& name,
                                         double& value) const
 {
     // Rechercher une clé
-    auto it = double_options_.find(name);
-    if (it != double_options_.end()) {
-        value = it->second;
+    auto it = list_options_.find(name);
+    if (it != list_options_.end()) {
+        value = std::stod(it->second);
         return true;
     } else {
         return false;
@@ -51,9 +67,9 @@ bool PopotamOptions::get_int_value(   const std::string& name,
                                         int& value) const
 {
     // Rechercher une clé
-    auto it = int_options_.find(name);
-    if (it != int_options_.end()) {
-        value = it->second;
+    auto it = list_options_.find(name);
+    if (it != list_options_.end()) {
+        value = std::stoi(it->second);
         return true;
     } else {
         return false;
@@ -64,8 +80,8 @@ bool PopotamOptions::get_string_value(   const std::string& name,
                                         std::string& value) const
 {
     // Rechercher une clé
-    auto it = string_options_.find(name);
-    if (it != string_options_.end()) {
+    auto it = list_options_.find(name);
+    if (it != list_options_.end()) {
         value = it->second;
         return true;
     } else {
@@ -90,6 +106,7 @@ void PopotamOptions::read(int argc, char** argv)
                 std::string option = input.substr(start + 2, equal_pos - (start + 2));
                 std::string value = input.substr(equal_pos + 1);
                 
+                add_option(option,value);/*
                 if (option =="basis_function")  add_string_option ( "basis_function", value);
                 else if (option =="bissection_type")  add_string_option ( "bissection_type", value);
                 else if (option =="precision")  add_double_option ( "precision", std::stod(value));
@@ -112,7 +129,7 @@ void PopotamOptions::read(int argc, char** argv)
                         add_string_option ( option, value);
                         break;
                     }                    
-                }
+                }*/
             }            
         }        
     }

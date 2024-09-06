@@ -11,19 +11,23 @@ class PopotamOptions
 {
 public :
     
-    void read(int argc, char** argv);
+    PopotamOptions();
     
-    void add_double_option( const std::string& name, 
-                            double value);
+    void add_option(const std::string& name, 
+                    const std::string& value);    
     
-    void add_int_option( const std::string& name, 
-                            int value);    
     
-    void add_string_option( const std::string& name, 
-                            const std::string& value);    
+//     void add_double_option( const std::string& name, 
+//                             double value);
+//     
+//     void add_int_option( const std::string& name, 
+//                             int value);    
+//     
+//     void add_string_option( const std::string& name, 
+//                             const std::string& value);    
     
 
-    void add_type_double (const std::string& type_name)
+/*    void add_type_double (const std::string& type_name)
     {
         double_option_types_.push_back(type_name);
     }
@@ -36,7 +40,7 @@ public :
     void add_type_string (const std::string& type_name)
     {
         string_option_types_.push_back(type_name);
-    }    
+    } */   
     
     bool get_double_value( const std::string& name,
                            double& value) const;
@@ -46,13 +50,11 @@ public :
 
     bool get_string_value( const std::string& name,
                            std::string& value) const;
+                           
+    void read(int argc, char** argv);                           
     
     
-    std::map< std::string, double> double_options_;
-    std::map< std::string, int> int_options_;
-    std::map< std::string, std::string> string_options_;
-    
-    std::vector<std::string> double_option_types_,int_option_types_,string_option_types_;
+    std::map< std::string, std::string> list_options_;
 };
 
 

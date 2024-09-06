@@ -10,7 +10,7 @@ class BissectionIntervalSolver: public AbstractSolver
 {
     public:
         BissectionIntervalSolver(   AbstractCSP* pb,
-                                    const std::string& bissection_type="MinFirst");
+                                    const PopotamOptions *options);
                                     
 
         virtual ~BissectionIntervalSolver();

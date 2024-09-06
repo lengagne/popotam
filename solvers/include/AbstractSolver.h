@@ -84,10 +84,10 @@ class AbstractSolver
         
         virtual param_optim set_results();
         
-        virtual void set_options( const PopotamOptions *options)
-        {
-            options_ = options;
-        }
+//         virtual void set_options( const PopotamOptions *options)
+//         {
+//             options_ = options;
+//         }
         
         void set_warm_start_filename( const std::string& s);
         

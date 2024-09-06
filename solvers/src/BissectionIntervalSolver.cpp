@@ -2,12 +2,19 @@
 #include <string.h>
 
 BissectionIntervalSolver::BissectionIntervalSolver(AbstractCSP* pb,
-                                                   const std::string& bissection_type)
+                                                   const PopotamOptions *options)
 {
     pb_ = pb;
     pb_->init();
     nb_fun_ = pb_->get_nb_out();
     nb_var_ = pb_->get_nb_in();
+    
+    std::string bissection_type ="undefined";
+    if( ! options_->get_string_value("bissection_type",bissection_type))
+    {
+        std::cerr<<"Error the bissection_type : "<< bissection_type<<" is not defined" <<std::endl;
+        exit(1);
+    }        
     
     if( bissection_type=="MinFirst")
         bissection_type_ = 0;

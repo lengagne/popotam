@@ -1,20 +1,38 @@
 #include "BissectionBasisFunctionSolver.h"
 #include <string.h>
 #include <time.h>
+#include "ChooseBasisFunction.h"
 
-
-BissectionBasisFunctionSolver::BissectionBasisFunctionSolver(AbstractCSP* pb, 
-                                                             AbstractBasisFunction*bf,
-                                                             const std::string& bissection_type)
+BissectionBasisFunctionSolver::BissectionBasisFunctionSolver(AbstractCSP* pb,                                                              
+                                                             const PopotamOptions *options)
 {
     LazyReset();
-    bf_ = bf;
+
+    std::string basis_function = "undefined";
+    if( ! options->get_string_value("basis_function",basis_function))
+    {
+        std::cerr<<"Error the basis_function : "<< basis_function<<" is not defined" <<std::endl;
+        exit(1);
+    }    
+    
+    ChooseBasisFunction choice_bf;
+    choice_bf.choose(&bf_,basis_function);
+
+    
+    options_ = options;
     std::cout<<"GIT BRANCH = "<<  GIT_BRANCH <<std::endl;
     int dummy = system("date");
     pb_ = pb;
     pb_->init();
     nb_fun_ = pb_->get_nb_out();
     nb_var_ = pb_->get_nb_in();
+    
+    std::string bissection_type ="undefined";
+    if( ! options_->get_string_value("bissection_type",bissection_type))
+    {
+        std::cerr<<"Error the bissection_type : "<< bissection_type<<" is not defined" <<std::endl;
+        exit(1);
+    }    
     
     if( bissection_type=="MinFirst")
         bissection_type_ = 0;

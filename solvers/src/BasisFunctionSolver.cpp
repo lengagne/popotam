@@ -2,35 +2,6 @@
 #include <string.h>
 #include <time.h>
 
-// void BasisFunctionSolver::compute_intermediate_for(uint num_function)
-// {
-//     for(auto const& id : intermediate_needed_[num_function])
-//     {
-//         if (!intermediate_updated_[id])
-//         {
-//             Interval v = infos_intermediate_update[id]->update_from_inputs();
-//             Intermediate_to_update[id].update( v);
-//             intermediate_updated_[id] = true;
-//         }
-//     }
-// }
-
-// void BasisFunctionSolver::get_all_intermediate_dependancies(const std::list<uint>& id_to_add,
-//                                                             std::list<uint> & full_list)
-// {
-//     std::list<uint> tmp;    
-//     for (auto const& id : id_to_add) 
-//     {
-//         if ( std::find ( full_list.begin(), full_list.end(), id) == full_list.end()) // if not id not in the list
-//         {
-//             full_list.push_back(id);
-//             tmp = infos_intermediate_update[id]->get_dep_intermediate();
-//             get_all_intermediate_dependancies(tmp,full_list);
-//         }
-//     }
-//     full_list.sort();
-// }
-
 void BasisFunctionSolver::init(double eps)
 {
     MogsIntervalInit();
@@ -328,7 +299,6 @@ param_optim BasisFunctionSolver::solve_optim(double eps)
         
         
         do{
-//             std::cout<<"\n start do "<<std::endl;
             // unpile
             cpt_iter_++;
             Result current = current_vector_.back();

@@ -11,8 +11,7 @@ class BissectionBasisFunctionSolver: public BasisFunctionSolver
 {
     public:
         BissectionBasisFunctionSolver(AbstractCSP* pb, 
-                                      AbstractBasisFunction* bf,
-                                      const std::string& bissection_type="MinFirst");
+                                      const PopotamOptions *options);
 
         virtual ~BissectionBasisFunctionSolver();
         

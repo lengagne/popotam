@@ -25,8 +25,8 @@ int main( int argc, char** argv)
     }    
         
     PopotamOptions *options = new PopotamOptions();
-    options->add_type_int("ndof");
-    options->add_type_int("problem");
+//     options->add_type_int("ndof");
+//     options->add_type_int("problem");
     
     options->read(argc,argv);
     
