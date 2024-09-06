@@ -232,7 +232,7 @@ bool AbstractSolver::load_warm_start_filename( const std::string& filename,
 
 void AbstractSolver::save_current_state( const std::string& filename)
 {        
-    QString qFileName = QString::fromStdString(filename);
+    QString qFileName = QString::fromStdString(filename+".sop");
     QFile xmlFile(qFileName);
     if (!xmlFile.open(QFile::WriteOnly | QFile::Text ))
     {
@@ -263,7 +263,7 @@ void AbstractSolver::save_current_state( const std::string& filename)
     
     current_time_ = get_cpu_time();
     QDomElement computation_time = document.createElement("computation_time");
-    text = document.createTextNode(QString::number(current_time_ - start_computation_time_));
+    text = document.createTextNode(QString::number(previous_time_+ current_time_ - start_computation_time_));
     computation_time.appendChild(text);
     root.appendChild(computation_time);        
     
@@ -273,8 +273,22 @@ void AbstractSolver::save_current_state( const std::string& filename)
     cpt_iter.setAttribute("saved_iter_", QString::number(saved_iter_));
     root.appendChild(cpt_iter);     
     
-    QDomElement pile = document.createElement("pile");
     uint nb = current_vector_.size();
+    QDomElement pourcentage = document.createElement("pourcentage");
+    double prct = 0.0;
+    for (int i=0;i<nb;i++)
+    {
+//         std::cout<<"   box "<< i<< " prct" <<current_vector_[i].get_pourcentage( bounds_input_) <<std::endl; 
+        prct += current_vector_[i].get_pourcentage( bounds_input_);
+    }
+//     std::cout<<"pourcentage : "<< prct <<std::endl;
+    text = document.createTextNode(QString::number(prct));
+    pourcentage.appendChild(text);
+    root.appendChild(pourcentage);  
+    
+    
+    QDomElement pile = document.createElement("pile");
+    nb = current_vector_.size();
     pile.setAttribute("nb", QString::number(nb));
     
     for (int i=0;i<nb;i++)

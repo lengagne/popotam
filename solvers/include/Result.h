@@ -24,9 +24,9 @@ public:
     std::vector<bool> ctr_ok;
     std::vector<bool> error_ok;
 
-    
-    
     friend std::ostream& operator<< (std::ostream& stream, const Result& res);
+    
+    double get_pourcentage( const std::vector<Interval> & bounds_input);    
     
     void load(QDomElement &El);
     

@@ -10,12 +10,7 @@
 #include "Interval.h"
 #include "Kronecker.h"
 
-
-#define MAXSIZE 50
-
 #define LazyVariable LazyVariable
-
-// typedef double Real;
 
 typedef enum {SON_COS_ERROR, SON_SIN_ERROR, SON_SIGNOF_ERROR /*,DIVIDE_ERROR,*/} sons_type;
 
@@ -100,6 +95,8 @@ bool compare(const mem& m1,const mem& m2);
 
 void MogsIntervalInit();
 
+void MogsIntervalSetMaxSize( uint s);
+
 class MogsInterval
 {
     public:
@@ -116,8 +113,9 @@ class MogsInterval
 
         virtual ~MogsInterval();
 
-        static MogsInterval add_intermediate(const MogsInterval & inter,
-                                             const unsigned int M=MAXSIZE);
+        static MogsInterval add_intermediate(const MogsInterval & inter);
+        
+        static MogsInterval add_intermediate(const MogsInterval & inter, uint max);        
         
         void add (const LazyVariable&in, mem * m);
 
@@ -316,7 +314,7 @@ class MogsInterval
         // data
         std::string name_;
         Interval value_;
-        std::map<mem*,LazyVariable> dependances_;
+        std::map<mem*,LazyVariable,compareMemPtr> dependances_;
 
         std::vector<sons> the_sons_;
         bool is_output_ = false;

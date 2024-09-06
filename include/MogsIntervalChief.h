@@ -12,7 +12,12 @@ class MogsIntervalChief
 
         MogsInterval * add_intermediate_pointer( const MogsInterval& input);
         
-        MogsInterval add_intermediate(const MogsInterval& inter, unsigned int M=MAXSIZE);
+        MogsInterval add_intermediate(const MogsInterval& inter)
+        {
+            return add_intermediate(inter, mogs_max_size_);
+        }
+        
+        MogsInterval add_intermediate(const MogsInterval& inter, unsigned int M);
 
         mem* check_input(mem* in);
 
@@ -42,6 +47,11 @@ class MogsIntervalChief
         unsigned int get_max_level();
         
         void reset();
+        
+        void set_mogs_max_size(uint s)
+        {
+            mogs_max_size_ = s;
+        }        
 
     protected:
 
@@ -54,6 +64,8 @@ class MogsIntervalChief
         std::vector<MogsInterval> intermediate_in_;
 
         std::map< unsigned long long , MogsInterval> memory_;
+        
+        uint mogs_max_size_ = 50;
 
 };
 

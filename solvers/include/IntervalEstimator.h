@@ -10,7 +10,7 @@
 #include <limits>
 
 // #define OFFSET_ERROR_INDEX std::numeric_limits<int>::max()/2
-#define OFFSET_ERROR_TH 1e-9
+#define OFFSET_ERROR_TH 1e-6
 
 /// test if the Interval in is INSIDE/OUTSIDE or OVERLAPPING the bound
 check_constraint test_Interval( const Interval &in ,
@@ -29,7 +29,7 @@ class IntervalEstimator{
 
         virtual unsigned int  prepare_coeffs( const MogsInterval& out, unsigned int num_out);
 
-        virtual Interval update_from_inputs( );
+        virtual Interval update_from_inputs(Result& res );
 //         virtual check_constraint update_from_inputs( Interval& out, Interval& bound);
         virtual check_constraint update_from_inputs( Result& res, 
                                                      Interval& bound,

@@ -193,7 +193,34 @@ unsigned int IntervalEstimator::prepare_coeffs( const MogsInterval& out, unsigne
     return nb_valid_coeff;
 }
 
-Interval IntervalEstimator::update_from_inputs( )
+// Interval IntervalEstimator::update_from_inputs( )
+// {
+//     unsigned int cpt = 0;  
+//     
+//     Interval out = 0.0;    
+//     
+//     if (nb_control_point_inputs_ != 0)
+//     {
+//         out = LazyUpdateOutput(num_out_,cpt++);
+//     }
+//     
+//     for (int i=1;i<nb_control_point_inputs_;i++)
+//     {
+//         Interval value = LazyUpdateOutput(num_out_,cpt++);
+//         out = Hull(out,value);
+//     }
+// 
+//     for (unsigned int i=0;i<nb_sparse_errors_;i++)
+//     {
+//         sparse_coeff_errors_(i) = LazyUpdateOutput(num_out_,cpt++);
+//     }
+// 
+//     Interval error = kron_solver_errors_->line_product(sparse_coeff_errors_);
+// //     std::cout<<"out = "<< out <<" error = "<< error <<std::endl;
+//     return out + error;
+// }
+
+Interval IntervalEstimator::update_from_inputs( Result& res )
 {
     unsigned int cpt = 0;  
     
@@ -210,15 +237,27 @@ Interval IntervalEstimator::update_from_inputs( )
         out = Hull(out,value);
     }
 
-    for (unsigned int i=0;i<nb_sparse_errors_;i++)
+    Interval error;
+    
+    if ( Diam( res.error[num_out_]) >= OFFSET_ERROR_TH)
     {
-        sparse_coeff_errors_(i) = LazyUpdateOutput(num_out_,cpt++);
+        // deal with error   
+        for (unsigned int i=0;i<nb_sparse_errors_;i++)
+            sparse_coeff_errors_(i) = LazyUpdateOutput(num_out_,cpt++);
+        
+        error = kron_solver_errors_->line_product(sparse_coeff_errors_);
+//         std::cout<<"on a calculé l'erreur("<< num_out_<<") "<< error <<std::endl;
+        res.error[num_out_] = error;
+    }else
+    {
+//         std::cout<<"on évite le calcul de l'erreur("<< num_out_<<") on réutilise "<< res.error[num_out_]<<std::endl;
+        error = res.error[num_out_];
     }
-
-    Interval error = kron_solver_errors_->line_product(sparse_coeff_errors_);
-//     std::cout<<"out = "<< out <<" error = "<< error <<std::endl;
-    return out + error;
+    
+    out += error;
+    return out;
 }
+
 
 // check_constraint IntervalEstimator::update_from_inputs( Interval& out, Interval& bound)
 check_constraint IntervalEstimator::update_from_inputs( Result& res, Interval& bound, uint index_ctr)
@@ -261,6 +300,7 @@ check_constraint IntervalEstimator::update_from_inputs( Result& res, Interval& b
     index_current_control_points_ = nb_control_point_inputs_;
     
     Interval error;
+//     std::cout<<"Diam( res.error[num_out_]) : "<< Diam( res.error[num_out_]) << " OFFSET_ERROR_TH "<< OFFSET_ERROR_TH <<std::endl;
     if ( Diam( res.error[num_out_]) >= OFFSET_ERROR_TH)
     {
         // deal with error   
@@ -269,10 +309,16 @@ check_constraint IntervalEstimator::update_from_inputs( Result& res, Interval& b
         
         error = kron_solver_errors_->line_product(sparse_coeff_errors_);
         res.error[num_out_] = error;
-    }    
+//         std::cout<<"on a calculé l'erreur("<< num_out_<<") "<< error <<std::endl;
+    }else
+    {
+//         std::cout<<"on évite le calcul de l'erreur("<< num_out_<<") on réutilise "<< res.error[num_out_]<<std::endl;
+        error = res.error[num_out_];
+    }
 
 //     std::cout<<"error = "<< res.error[num_out_] <<std::endl;
     out = Iv + res.error[num_out_];
+    res.out[num_out_] = out;
 //     std::cout<<"out final = "<< out <<std::endl;
     if (Intersection(out,bound))
     {

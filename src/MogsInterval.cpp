@@ -4,6 +4,8 @@
 MogsIntervalChief interval_chief_;
 unsigned long long nb_mogs_intervals_ = 0;
 
+uint MogsMaxSize = 50;
+
 mem::mem(const mem& m):sons(m.sons)
 {
 
@@ -190,6 +192,13 @@ void MogsIntervalInit()
     interval_chief_.reset();
 }
 
+void MogsIntervalSetMaxSize( uint s)
+{
+    MogsMaxSize = s;
+    interval_chief_.set_mogs_max_size(s);
+}
+
+
 MogsInterval::MogsInterval()
 {
     id_ = nb_mogs_intervals_++;
@@ -270,11 +279,15 @@ void MogsInterval::add (const LazyVariable&in, mem * m)
     dependances_[m]= in;
 }
 
-MogsInterval MogsInterval::add_intermediate( const MogsInterval & inter,
-                                             const unsigned int M)
+MogsInterval MogsInterval::add_intermediate( const MogsInterval & inter)
 {
 //     std::cout<<"add_intermediate inter = "<< inter <<std::endl;
-    return interval_chief_.add_intermediate(inter,M);
+    return interval_chief_.add_intermediate(inter,MogsMaxSize);
+}
+
+MogsInterval MogsInterval::add_intermediate(const MogsInterval & inter, uint max)
+{
+    return interval_chief_.add_intermediate(inter,max);
 }
 
 mem* MogsInterval::chief_check_input(mem* in) const
@@ -704,7 +717,7 @@ MogsInterval MogsInterval::operator- (const MogsInterval& I) const
         out.dependances_[itmem->first] -= itmem->second;
 
     // std::cout<<"operator- : "<< out <<std::endl;
-    if(out.guess_size() > MAXSIZE)
+    if(out.guess_size() > MogsMaxSize)
     {
         MogsInterval new_intermediate = add_intermediate(out);
         return new_intermediate;
@@ -723,7 +736,7 @@ MogsInterval MogsInterval::operator+ (const MogsInterval& I) const
         out.dependances_[itmem->first] += itmem->second;
     }
     // std::cout<<"operator+ : "<< out <<std::endl;
-    if(out.guess_size() > MAXSIZE)
+    if(out.guess_size() > MogsMaxSize)
     {
         MogsInterval new_intermediate = add_intermediate(out);
         return new_intermediate;
@@ -740,7 +753,7 @@ void MogsInterval::operator+= (const MogsInterval& I)
     // We must need to add this line to consider new variable !!
     id_ = nb_mogs_intervals_++;
     // std::cout<<"operator+= : "<< *this <<std::endl;
-    if(guess_size() > MAXSIZE)
+    if(guess_size() > MogsMaxSize)
     {
         *this =  add_intermediate(*this);
     }
@@ -753,7 +766,7 @@ void MogsInterval::operator-= (const MogsInterval& I)
     // We must need to add this line to consider new variable !!
     id_ = nb_mogs_intervals_++;    
     // std::cout<<"operator-= : "<< *this <<std::endl;
-    if(guess_size() > MAXSIZE)
+    if(guess_size() > MogsMaxSize)
     {
         *this =  add_intermediate(*this);
     }
@@ -784,7 +797,7 @@ MogsInterval MogsInterval::operator* (const LazyVariable& d) const
     for(std::map<mem*,LazyVariable>::iterator itmem = out.dependances_.begin(); itmem != out.dependances_.end(); itmem++)
         itmem->second *= d;
     // std::cout<<"operator* : "<< out <<std::endl;
-    if(out.guess_size() > MAXSIZE)
+    if(out.guess_size() > MogsMaxSize)
     {
         return add_intermediate(out);
     }
@@ -813,7 +826,7 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
         return in;        
     }
    // std::cout<<"operator- : "<< out <<std::endl;
-    if(guess_size() > MAXSIZE && in.guess_size() > MAXSIZE)
+    if(guess_size() > MogsMaxSize && in.guess_size() > MogsMaxSize)
     {
         MogsInterval i1 = add_intermediate(*this);
         MogsInterval i2 = add_intermediate(in);
@@ -824,9 +837,9 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
     out.value_ = value_ * in.value_;
     if( this == &in)
     {
-        if(guess_size() > MAXSIZE/2)
+        if(guess_size() > MogsMaxSize/2)
         {
-            MogsInterval i1 = add_intermediate(*this,MAXSIZE/2);
+            MogsInterval i1 = add_intermediate(*this,MogsMaxSize/2);
             return i1*i1;
         }
 
@@ -860,7 +873,7 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
         }
 
         //if(out.get_nb_value() > MAXMUL)
-        if(out.guess_size() > MAXSIZE)
+        if(out.guess_size() > MogsMaxSize)
         {
             MogsInterval new_intermediate = add_intermediate(out);
             return new_intermediate;
@@ -885,7 +898,7 @@ MogsInterval MogsInterval::operator* (const MogsInterval& in) const
             out.dependances_[good] += it1->second * it2->second;
         }
     }
-    if(out.guess_size() > MAXSIZE)
+    if(out.guess_size() > MogsMaxSize)
     {
         MogsInterval new_intermediate = add_intermediate(out);
         return new_intermediate;

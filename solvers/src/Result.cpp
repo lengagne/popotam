@@ -17,11 +17,11 @@ Result::Result( const std::vector<Interval> &input,
     in = input;     
     out.resize(nb_value+optim);
     ctr_ok.resize(nb_value);
-    for (int i=0;i<nb_value;i++)
-    {
+    for (int i=0;i<nb_value+optim;i++)
         out[i] = 0.;
+    
+    for (int i=0;i<nb_value;i++)
         ctr_ok[i] = false;
-    }    
 
     error.resize(nb_value+optim);
     error_ok.resize(nb_value+optim);
@@ -30,6 +30,14 @@ Result::Result( const std::vector<Interval> &input,
         error[i] = Hull(-42.0,42.42);   // 
         error_ok[i] = false;
     }  
+}
+
+double Result::get_pourcentage( const std::vector<Interval> & bounds_input)
+{
+    double c = 1.0;
+    for (int i=0;i<bounds_input.size();i++)
+        c *= Diam(in[i]) / Diam( bounds_input[i]);
+    return c;
 }
 
 void Result::load(QDomElement &El)
@@ -68,7 +76,7 @@ void Result::load(QDomElement &El)
     }      
     
     uint nb_ctr_ok = El.attribute("nb_ctr_ok").toInt();
-    ctr_ok.resize(nb_error);
+    ctr_ok.resize(nb_ctr_ok);
     for (QDomElement El1 = El.firstChildElement("ctr_ok"); !El1.isNull(); El1 = El1.nextSiblingElement("ctr_ok") )
     {                    
         uint id = El1.attribute("id").toInt();
@@ -77,7 +85,7 @@ void Result::load(QDomElement &El)
     }      
       
     uint nb_error_ok = El.attribute("nb_error_ok").toInt();
-    error_ok.resize(nb_error);
+    error_ok.resize(nb_error_ok);
     for (QDomElement El1 = El.firstChildElement("error_ok"); !El1.isNull(); El1 = El1.nextSiblingElement("error_ok") )
     {                    
         uint id = El1.attribute("id").toInt();
@@ -175,10 +183,10 @@ std::ostream& operator<< (std::ostream& stream, const Result& res)
     {
         stream<<"INPUT["<<i<<"] = "<< res.in[i]<<std::endl;
     }
-//     for (int i=0;i<res.out.size();i++)
-//     {
-//         stream<<"OUTPUT["<<i<<"] = "<< res.out[i]<<std::endl;
-//     }
+    for (int i=0;i<res.out.size();i++)
+    {
+        stream<<"OUTPUT["<<i<<"] = "<< res.out[i]<<"  + error:"<<res.error[i]<<std::endl;
+    }
     return stream;
 }
     

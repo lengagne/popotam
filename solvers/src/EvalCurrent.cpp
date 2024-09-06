@@ -55,7 +55,7 @@ void EvalCurrent::compute_intermediate_for(uint num_function)
     {
         if (!intermediate_updated_[id])
         {
-            Interval v = infos_intermediate_update[id]->update_from_inputs();
+            Interval v = infos_intermediate_update[id]->update_from_inputs(current_value_);
             Intermediate_to_update[id].update( v);
             intermediate_updated_[id] = true;
         }
@@ -69,12 +69,12 @@ void EvalCurrent::evaluate(Result& value)
     for (int i=0;i<nb_fun_;i++)
     {
         compute_intermediate_for(i);
-        value.out[i] = infos[i]->update_from_inputs();
+        value.out[i] = infos[i]->update_from_inputs(value);
     }
     if(solve_optim_)
     {
         compute_intermediate_for(nb_fun_);
-        value.out[nb_fun_] = info_crit_->update_from_inputs();
+        value.out[nb_fun_] = info_crit_->update_from_inputs(value);
     }else
     {
         std::cout<<"on ne calcule pas le dernier"<<std::endl;
@@ -127,14 +127,16 @@ void EvalCurrent::get_all_intermediate_dependancies(const std::list<uint>& id_to
 
 bool EvalCurrent::process_current(Result& current_value, optim_info& info)
 {
+//     std::cout<<"EvalCurrent::process_current begin : "<< current_value<<std::endl;
     set_current(current_value);
-    
+//     std::cout<<"EvalCurrent::process_current step1 : "<< current_value_<<std::endl;
     check_constraint type_optim = OVERLAP;
     Interval tmp_crit = Hull(-std::numeric_limits<double>::max(),info.optim_crit_);
     if(info.find_one_feasible_)  // if one solution found check if we can found better
     {
         compute_intermediate_for(nb_fun_);            
-        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);         
+        type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);     
+//         std::cout<<"EvalCurrent::process_current step2 : "<< current_value_<<std::endl;
     }
 
     if( type_optim != OUTSIDE)
@@ -172,8 +174,10 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
             {
                 info.additionnal_score += 1.0; 
             }
+//             std::cout<<"EvalCurrent::process_current step3-"<<i<<" : "<< current_value_<<std::endl;
         }      
                     
+        current_value = current_value_;
         // check the optimal
         switch(type)
         {
@@ -184,6 +188,7 @@ bool EvalCurrent::process_current(Result& current_value, optim_info& info)
                                 {
                                     compute_intermediate_for(nb_fun_);
                                     type_optim = info_crit_->update_from_inputs(current_value_,tmp_crit, nb_fun_);
+                                    current_value = current_value_;
                                 }
                                 info.additionnal_score += info_crit_->get_score_from_current_control_points();
                                switch(type_optim)
