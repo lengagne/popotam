@@ -20,19 +20,19 @@ void PopotamPrintAllOptions()
     std::cout<<"\t\t Smart "<<std::endl;
 }
 
-void PopotamSetSolver( AbstractCSP* pb,
-                AbstractSolver** solver, 
-                const SolverOptions& options)
+void PopotamSetSolver(  AbstractCSP* pb,
+                        AbstractSolver** solver, 
+                        const PopotamOptions* options)
 {
     std::string basis_function = "undefined";
-    if( ! options.get_string_value("basis_function",basis_function))
+    if( ! options->get_string_value("basis_function",basis_function))
     {
         std::cerr<<"Error the basis_function : "<< basis_function<<" is not defined" <<std::endl;
         exit(1);
     }
     
     std::string bissection_type = "undefined";
-    if( ! options.get_string_value("bissection_type",bissection_type))
+    if( ! options->get_string_value("bissection_type",bissection_type))
     {
         std::cerr<<"Error the bissection_type : "<< bissection_type<<" is not defined" <<std::endl;
         exit(1);

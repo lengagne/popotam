@@ -2,11 +2,11 @@
 #define ChooseSolver_H
 
 #include "AbstractSolver.h"
-#include "SolverOptions.h"
+#include "PopotamOptions.h"
 
 void PopotamSetSolver( AbstractCSP* pb,
                 AbstractSolver** solver, 
-                const SolverOptions& options);
+                const PopotamOptions* options);
 
 
 void PopotamPrintAllOptions();

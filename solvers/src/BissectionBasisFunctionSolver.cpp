@@ -5,8 +5,7 @@
 
 BissectionBasisFunctionSolver::BissectionBasisFunctionSolver(AbstractCSP* pb, 
                                                              AbstractBasisFunction*bf,
-                                                            const std::string& bissection_type
-                                                            )
+                                                             const std::string& bissection_type)
 {
     LazyReset();
     bf_ = bf;

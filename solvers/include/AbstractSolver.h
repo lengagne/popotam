@@ -8,7 +8,7 @@
 
 #include "AbstractCSP.h"
 #include "Result.h"
-#include "SolverOptions.h"
+#include "PopotamOptions.h"
 
 typedef struct param_optim
 {
@@ -84,7 +84,7 @@ class AbstractSolver
         
         virtual param_optim set_results();
         
-        virtual void set_options( SolverOptions options)
+        virtual void set_options( const PopotamOptions *options)
         {
             options_ = options;
         }
@@ -95,7 +95,7 @@ class AbstractSolver
 
     protected:
                
-        SolverOptions options_;
+        const PopotamOptions* options_;
         
         AbstractCSP *pb_;
 

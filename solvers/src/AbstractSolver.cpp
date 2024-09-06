@@ -117,7 +117,7 @@ void AbstractSolver::close_files()
 void AbstractSolver::init_option()
 {
     precision_ = 0.01;
-    if ( options_.get_double_value("precision", precision_))
+    if ( options_->get_double_value("precision", precision_))
     {
         std::cout<<" We found the option precision : "<< precision_ <<std::endl;
     }else
